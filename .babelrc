@@ -15,6 +15,11 @@
     ["component", {
       "libraryName": "mint-ui",
       "style": true
-    }, "mint-ui"]
+    }, "mint-ui"],
+    ["import", {
+      "libraryName": "ant-design-vue",
+      "libraryDirectory": "es",
+      "style": "css"
+    }]
   ]
 }

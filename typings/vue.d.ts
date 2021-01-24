@@ -6,6 +6,7 @@ declare module 'vue/types/vue' {
     $style: {
       [key: string]: string
     }
+    [propName: string]: any
   }
 }
 

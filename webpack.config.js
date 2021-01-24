@@ -236,7 +236,11 @@ module.exports = function makeWebpackConfig() {
   config.devServer = {
     contentBase: path.join(__dirname, './dist'),
     historyApiFallback: {
-      rewrites:  [{from: /.*/, to: (context) => context.parsedUrl.pathname + '.html'}]
+      rewrites:  [
+        {from: /^\/admin$/, to: '/admin.html'},
+        {from: /^\/$/, to: '/search.html'},
+        {from: /^\/r/, to: '/search.html'}
+        ]
     },
     stats: {
       modules: false,

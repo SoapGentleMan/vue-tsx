@@ -1,0 +1,31 @@
+.header {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.line {
+  display: flex;
+  justify-content: space-between;
+  margin: 16px 0;
+
+  :global(.ant-input) {
+    width: 150px;
+  }
+}
+
+.pagination {
+  padding-top: 20px;
+  text-align: center;
+}
+
+.formItem {
+  margin-bottom: 16px;
+
+  :global(.ant-select) {
+    width: 100%;
+  }
+}
+
+.warnColor {
+  color: #cb2c1e;
+}

@@ -1,0 +1,168 @@
+.layout {
+  min-height: 100vh !important;
+  background-color: #fff;
+
+  :global(.ant-layout-header) {
+    background-color: #fff;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+
+  :global(.ant-layout-footer) {
+    background-color: #fbfbfb;
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+.loginBtn {
+  color: #fff;
+  background-color: #4e71f2;
+  font-size: 13px;
+  height: 24px;
+  width: 48px;
+  line-height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+}
+
+.content {
+  width: 654px;
+  height: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.logo {
+  margin-top: 100px;
+  width: 270px;
+  height: 129px;
+}
+
+.inputBlock {
+  margin-top: 16px;
+  white-space: nowrap;
+
+  .input {
+    width: 548px;
+    height: 44px;
+    padding: 12px 16px;
+    font-size: 16px;
+    margin: 0;
+    vertical-align: top;
+    outline: 0;
+    box-shadow: none;
+    border-radius: 10px 0 0 10px;
+    border: 2px solid #c4c7ce;
+    background: #fff;
+    color: #222;
+
+    &:hover {
+      border-color: #a7aab5;
+    }
+  }
+
+  .btn {
+    display: inline-block;
+    width: 108px;
+    height: 44px;
+    position: relative;
+    right: 1px;
+    z-index: 2;
+    cursor: pointer;
+    line-height: 45px;
+    padding: 0;
+    background-color: #4e6ef2;
+    border-radius: 0 10px 10px 0;
+    font-size: 17px;
+    color: #fff;
+    box-shadow: none;
+    border: none;
+    outline: 0;
+    text-align: center;
+  }
+}
+
+.toggleBlock {
+  width: 654px;
+  margin-top: 45px;
+  margin-bottom: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .text {
+    color: #222;
+  }
+
+  .block {
+    color: #9195a3;
+    cursor: pointer;
+
+    &:hover {
+      color: #315efb;
+    }
+  }
+
+  .icon {
+    margin-right: 4px;
+  }
+}
+
+.hotList {
+  width: 654px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+
+  .hot {
+    width: 268px;
+    height: 32px;
+    line-height: 32px;
+    color: #222;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    &:hover {
+      color: #315efb;
+    }
+
+    &:visited {
+      color: #626675;
+    }
+  }
+
+  .order {
+    display: inline-block;
+    width: 18px;
+    font-size: 15px;
+    margin-right: 2px;
+    color: #9195a3;
+
+    &.order1 {
+      color: #fe2d46;
+    }
+
+    &.order2 {
+      color: #f60;
+    }
+
+    &.order3 {
+      color: #faa90e;
+    }
+  }
+
+  .text {
+    font-size: 14px;
+  }
+}
+
+.layer {
+  color: #bbb;
+  margin-right: 20px;
+}
