@@ -38,11 +38,19 @@ export default class Index extends Vue {
     location.href = 'http://localhost/r?s=' + value
   }
 
+  toggleLogin() {
+    if (this.isLogin) {
+      this.isLogin = false
+    } else {
+      this.showLoginModal = true
+    }
+  }
+
   render(h) {
     return (
       <a-layout class={this.$style.layout}>
         <a-layout-header>
-          {!this.isLogin && <a-button type={'primary'} class={this.$style.loginBtn} onClick={() => this.showLoginModal = true}>登录</a-button>}
+          <a-button type={'primary'} class={this.$style.loginBtn} onClick={() => this.toggleLogin()}>{this.isLogin ? '登出' : '登录'}</a-button>
 
           {this.showLoginModal && <div class={this.$style.loginBg}>
             <LoginModal class={this.$style.login} onLogin={() => this.isLogin = true} onClose={() => this.showLoginModal = false}/>

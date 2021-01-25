@@ -187,6 +187,7 @@ module.exports = function makeWebpackConfig() {
     })),
 
     new webpack.DefinePlugin({
+      SERVER: JSON.stringify('http://localhost:8081'),
       isProd: JSON.stringify(isProd),
       isRelease: JSON.stringify(isRelease)
     }),
