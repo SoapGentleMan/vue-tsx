@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import './components'
+import LoginModal from '../../../components/login-modal/index.tsx.vue'
 
 @Component({})
 export default class Index extends Vue {
@@ -22,6 +23,9 @@ export default class Index extends Vue {
   pn: number = 1;
   ps: number = 6;
 
+  isLogin: boolean = false;
+  showLoginModal: boolean = false;
+
   changePn() {
     if (this.pn * this.ps >= this.data.length) {
       return this.pn = 1
@@ -38,7 +42,11 @@ export default class Index extends Vue {
     return (
       <a-layout class={this.$style.layout}>
         <a-layout-header>
-          <a-button type={'primary'} class={this.$style.loginBtn}>登陆</a-button>
+          {!this.isLogin && <a-button type={'primary'} class={this.$style.loginBtn} onClick={() => this.showLoginModal = true}>登录</a-button>}
+
+          {this.showLoginModal && <div class={this.$style.loginBg}>
+            <LoginModal class={this.$style.login} onLogin={() => this.isLogin = true} onClose={() => this.showLoginModal = false}/>
+          </div>}
         </a-layout-header>
 
         <a-layout-content>
@@ -65,7 +73,8 @@ export default class Index extends Vue {
                     return order > this.data.length ?
                       <div key={order} class={this.$style.hot}/>
                       :
-                      <a key={order}  class={this.$style.hot}>
+                      <a key={order}  class={this.$style.hot}
+                         href={'http://localhost/r?s=' + this.data[order - 1]} target={'_blank'}>
                         <span class={[this.$style.order, this.$style['order' + order]]}>{order}</span>
                         <span class={this.$style.text}>{this.data[order - 1]}</span>
                       </a>

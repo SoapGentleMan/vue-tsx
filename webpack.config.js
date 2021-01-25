@@ -141,7 +141,9 @@ module.exports = function makeWebpackConfig() {
             }
           }
         ],
-        exclude: []
+        exclude: [
+          path.resolve(__dirname, './src/images/login')
+        ]
       },
       {
         test: /\.(png|jpg|jpeg|gif|svg)(\?.+)?$/,
@@ -154,7 +156,9 @@ module.exports = function makeWebpackConfig() {
             }
           }
         ],
-        include: []
+        include: [
+          path.resolve(__dirname, './src/images/login')
+        ]
       },
       // {
       //   test: /\.html/,
@@ -187,6 +191,8 @@ module.exports = function makeWebpackConfig() {
       isRelease: JSON.stringify(isRelease)
     }),
 
+    new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
+
     new VueLoaderPlugin(),
 
     new StyleLintPlugin({
@@ -194,6 +200,9 @@ module.exports = function makeWebpackConfig() {
     })
   );
 
+  const adminPageArr = fs.readdirSync('./src/pages/admin', {withFileTypes: true}).filter(item => item.isDirectory()).map(item => item.name);
+  const searchPageArr = fs.readdirSync('./src/pages/search', {withFileTypes: true}).filter(item => item.isDirectory()).map(item => item.name);
+  const pageAll = [].concat(pageArr, adminPageArr, searchPageArr).filter(item => item !== 'search');
   config.optimization = {
     minimizer: [
       new UglifyPlugin({
@@ -215,9 +224,9 @@ module.exports = function makeWebpackConfig() {
         common: {
           name: 'common',
           chunks(chunk) {
-            return pageArr.indexOf(chunk.name) > -1
+            return pageAll.indexOf(chunk.name) > -1
           },
-          minChunks: pageArr.length
+          minChunks: pageAll.length
         },
         lib: {
           name: 'lib',
@@ -237,6 +246,7 @@ module.exports = function makeWebpackConfig() {
     contentBase: path.join(__dirname, './dist'),
     historyApiFallback: {
       rewrites:  [
+        {from: /^\/login$/, to: '/login.html'},
         {from: /^\/admin$/, to: '/admin.html'},
         {from: /^\/$/, to: '/search.html'},
         {from: /^\/r/, to: '/search.html'}

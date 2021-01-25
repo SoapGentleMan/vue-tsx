@@ -1,30 +1,83 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import './components'
+import LoginModal from '../../../components/login-modal/index.tsx.vue'
 
 @Component({})
 export default class Result extends Vue {
   filterData = [
     {
       title: '范围',
-      options: ['全部', 'vip1', 'vip2', 'vip3'],
-      selectedIndex: 0
+      options: ['全部', 'vip1', 'vip2', 'vip3']
     },
     {
       title: '格式',
-      options: ['全部', 'doc', 'exle', 'aaa'],
-      selectedIndex: 0
+      options: ['全部', 'doc', 'exle', 'aaa']
     },
     {
       title: '时间',
-      options: ['全部', 'time1', 'time2', 'time3'],
-      selectedIndex: 0
+      options: ['全部', 'time1', 'time2', 'time3']
     }
   ];
+  filterValue = [0, 0, 0]
   sortValue = '1';
+  searchValue = '';
+
+  resultData: any[] = [
+    {
+      title: '协议书模板',
+      desc: '合同编号：协议书xxx，协议xxx，巴巴爸爸爸爸爸爸爸爸爸爸爸爸爸爸合同编号：协议书xxx，协议xxx，巴巴爸爸爸爸爸爸爸爸爸爸爸爸爸爸合同编号：协议书xxx，协议xxx，巴巴爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸',
+      time: '2020-10-10',
+      downloadCount: '1111',
+      downloadUrl: 'xxxx'
+    },
+    {
+      title: '协议书模板',
+      desc: '合同编号：协议书xxx，协议xxx，巴巴爸爸爸爸爸爸爸爸爸爸爸爸爸爸',
+      time: '2020-10-10',
+      downloadCount: '1111',
+      downloadUrl: 'xxxx'
+    },
+    {
+      title: '协议书模板',
+      desc: '合同编号：协议书xxx，协议xxx，巴巴爸爸爸爸爸爸爸爸爸爸爸爸爸爸',
+      time: '2020-10-10',
+      downloadCount: '1111',
+      downloadUrl: 'xxxx'
+    },
+    {
+      title: '协议书模板',
+      desc: '合同编号：协议书xxx，协议xxx，巴巴爸爸爸爸爸爸爸爸爸爸爸爸爸爸',
+      time: '2020-10-10',
+      downloadCount: '1111',
+      downloadUrl: 'xxxx'
+    }
+  ]
 
   pn: number = 1;
   ps: number = 10;
+
+  isLogin: boolean = true;
+  showLoginModal: boolean = true;
+
+  created() {
+    this.searchValue = this.$route.query.s as string || '';
+    this.sortValue = this.$route.query.o as string || '1';
+    const arr = (this.$route.query.f  as string || '').split(',');
+    this.filterValue = new Array(3).fill(0)
+      .map((item, index) => parseInt(arr[index], 10) || item)
+      .map(item => Math.min(item, 3));
+
+    this.resultData = this.modifyDataWithRelatedWord(this.resultData)
+  }
+
+  modifyDataWithRelatedWord(data) {
+    return data.map(item => {
+      item.titleHtml = item.title.replaceAll('协议', '<em>协议</em>');
+      item.descHtml = item.desc.replaceAll('协议', '<em>协议</em>');
+      return item
+    })
+  }
 
   changePn() {
     this.pn += 1
@@ -45,7 +98,9 @@ export default class Result extends Vue {
             <span class={this.$style.btn} onClick={() => this.search()}>搜索一下</span>
           </div>
 
-          <a-button type={'primary'} class={this.$style.loginBtn}>登陆</a-button>
+          {this.showLoginModal && <div class={this.$style.loginBg}>
+            <LoginModal class={this.$style.login} onLogin={() => this.isLogin = true} onClose={() => this.showLoginModal = false}/>
+          </div>}
         </a-layout-header>
 
         <a-layout-content>
@@ -57,7 +112,7 @@ export default class Result extends Vue {
                     <div key={index} class={this.$style.filterLine}>
                       <span class={this.$style.title}>{item.title}:</span>
                       {
-                        item.options.map((i, n) =>  <span key={n} class={[this.$style.option, item.selectedIndex === n ? this.$style.selected : '']}>{i}</span>)
+                        item.options.map((i, n) =>  <span key={n} class={[this.$style.option, this.filterValue[index] === n ? this.$style.selected : '']}>{i}</span>)
                       }
                     </div>
                   )
@@ -85,7 +140,24 @@ export default class Result extends Vue {
               <span class={this.$style.text}>关联性</span>
             </div>
 
-            <div class={this.$style.resultList}></div>
+            <div class={this.$style.resultList}>
+              {
+                this.resultData.map((item, index) => {
+                  return (
+                    <div key={index} class={this.$style.result}>
+                      <div class={this.$style.title} domPropsInnerHTML={item.titleHtml}/>
+                      <div class={this.$style.desc} domPropsInnerHTML={item.descHtml}/>
+                      <div class={this.$style.line}>
+                        {item.time}
+                        <i class={this.$style.divider}>|</i>
+                        {item.downloadCount}
+                        <a class={this.$style.btn} href={item.downloadUrl} target={'_blank'}>马上下载</a>
+                      </div>
+                    </div>
+                  )
+                })
+              }
+            </div>
           </div>
         </a-layout-content>
       </a-layout>
