@@ -2,48 +2,89 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import './components'
 import LoginModal from '../../../components/login-modal/index.tsx.vue'
+import account from '../../../lib/api/account'
+import search from '../../../lib/api/search'
 
 @Component({})
 export default class Index extends Vue {
-  data = [
-    '法大师傅大师傅就啊圣诞快乐房价ask来得及1',
-    '法大师傅大师傅就啊圣诞快乐房价ask来得及2',
-    '法大师傅大师傅就啊圣诞快乐房价ask来得及3',
-    '法大师傅大师傅就啊圣诞快乐房价ask来得及4',
-    '法大师傅大师傅就啊圣诞快乐房价ask来得及5',
-    '法大师傅大师傅就啊圣诞快乐房价ask来得及6',
-    '法大师傅大师傅就啊圣诞快乐房价ask来得及7',
-    '法大师傅大师傅就啊圣诞快乐房价ask来得及8',
-    '法大师傅大师傅就啊圣诞快乐房价ask来得及9',
-    '法大师傅大师傅就啊圣诞快乐房价ask来得及10',
-    '法大师傅大师傅就啊圣诞快乐房价ask来得及11',
-    '法大师傅大师傅就啊圣诞快乐房价ask来得及12',
-    '法大师傅大师傅就啊圣诞快乐房价ask来得及12',
-  ];
+  hotWords: string[][] = [];
   pn: number = 1;
   ps: number = 6;
+  loading: boolean = false;
+  totalPn: number = 0;
+  showPn: number = 0;
 
   isLogin: boolean = false;
   showLoginModal: boolean = false;
 
-  changePn() {
-    if (this.pn * this.ps >= this.data.length) {
-      return this.pn = 1
+  created() {
+    this.isLogin = !!localStorage.getItem('authorization');
+    if (this.isLogin) {
+      this.getHotWord()
     }
-    this.pn += 1
+  }
+
+  getHotWord() {
+    if (this.loading) {
+      return
+    }
+    this.loading = true;
+    return search.getHotWords({pn: this.pn, ps: this.ps})
+      .then(data => {
+        if (data.success === true && !!data.words && data.words.length > 0) {
+          this.$set(this.hotWords, this.pn - 1, data.words);
+          this.totalPn = data.pages;
+          this.pn = this.pn + 1;
+          this.showPn = this.showPn + 1
+        } else {
+          throw new Error(data.message)
+        }
+      })
+      .catch(e => {
+        if (e.message === '未登录') {
+          localStorage.removeItem('authorization');
+          this.isLogin = false;
+          this.showPn = 0
+        } else {
+          this.showPn = 1
+        }
+      })
+      .finally(() => this.loading = false)
+
+  }
+
+  toggleHotWords() {
+    if (this.showPn === this.totalPn && this.totalPn !== 0) {
+      return this.showPn = 1
+    }
+    if (!!this.hotWords[this.showPn]) {
+      return this.showPn = this.showPn + 1
+    }
+    this.getHotWord()
   }
 
   search() {
+    if (!this.isLogin) {
+      return this.toggleLogin()
+    }
     const value = (this.$refs.input as HTMLInputElement).value;
     location.href = 'http://localhost/r?s=' + value
   }
 
   toggleLogin() {
     if (this.isLogin) {
-      this.isLogin = false
+      account.logout();
+      localStorage.removeItem('authorization');
+      this.isLogin = false;
+      this.showPn = 0
     } else {
       this.showLoginModal = true
     }
+  }
+
+  doAfterLogin() {
+    this.isLogin = true;
+    this.toggleHotWords()
   }
 
   render(h) {
@@ -53,7 +94,7 @@ export default class Index extends Vue {
           <a-button type={'primary'} class={this.$style.loginBtn} onClick={() => this.toggleLogin()}>{this.isLogin ? '登出' : '登录'}</a-button>
 
           {this.showLoginModal && <div class={this.$style.loginBg}>
-            <LoginModal class={this.$style.login} onLogin={() => this.isLogin = true} onClose={() => this.showLoginModal = false}/>
+            <LoginModal class={this.$style.login} onLogin={() => this.doAfterLogin()} onClose={() => this.showLoginModal = false}/>
           </div>}
         </a-layout-header>
 
@@ -66,25 +107,26 @@ export default class Index extends Vue {
               <span class={this.$style.btn} onClick={() => this.search()}>搜索一下</span>
             </div>
 
-            {!!this.data && <div class={this.$style.toggleBlock}>
+            {this.isLogin && this.hotWords.length > 0 && <div class={this.$style.toggleBlock}>
               <span class={this.$style.text}>今日热点</span>
-              <div class={this.$style.block} onClick={() => this.changePn()}>
+              {this.totalPn > 1 && <div class={this.$style.block} onClick={() => this.toggleHotWords()}>
                 <a-icon type={'sync'} class={this.$style.icon}/>换一换
-              </div>
+              </div>}
             </div>}
 
-            {!!this.data && <div class={this.$style.hotList}>
+            {this.isLogin && this.hotWords.length > 0 && <div class={this.$style.hotList}>
               {
                 new Array(3).fill(1).map((item, index) => {
                   return new Array(2).fill(1).map((i, n) => {
-                    const order = (this.pn - 1) * this.ps + index + n * 3 + 1;
-                    return order > this.data.length ?
+                    const cIndex = index + n * 3;
+                    const order = (this.showPn - 1) * this.ps + cIndex + 1;
+                    return cIndex > this.hotWords[this.showPn - 1].length - 1 ?
                       <div key={order} class={this.$style.hot}/>
                       :
                       <a key={order}  class={this.$style.hot}
-                         href={'http://localhost/r?s=' + this.data[order - 1]} target={'_blank'}>
+                         href={'http://localhost/r?s=' + this.hotWords[this.showPn - 1][cIndex]} target={'_blank'}>
                         <span class={[this.$style.order, this.$style['order' + order]]}>{order}</span>
-                        <span class={this.$style.text}>{this.data[order - 1]}</span>
+                        <span class={this.$style.text}>{this.hotWords[this.showPn - 1][cIndex]}</span>
                       </a>
                   })
                 })

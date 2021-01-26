@@ -1,0 +1,49 @@
+{
+  "success": true,
+  "message": "成功",
+  "country_name": [
+    "中国",
+    "越南",
+    "泰国"
+  ],
+  "country_code": [
+    "cn",
+    "vnm",
+    "th"
+  ],
+  "type_name": [
+    "网页",
+    "PDF",
+    "Word"
+  ],
+  "type_code": [
+    "html",
+    "pdf",
+    "word"
+  ],
+  "type_icon": [
+    "",
+    "",
+    ""
+  ],
+  "time_name": [
+    "一周内",
+    "一月内",
+    "一年"
+  ],
+  "time_code": [
+    "week",
+    "month",
+    "year"
+  ],
+  "sort_name": [
+    "相关性",
+    "下载量",
+    "最新"
+  ],
+  "sort_type": [
+    "rel",
+    "download",
+    "new"
+  ]
+}

@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import {Prop} from 'vue-property-decorator'
 import { message } from 'ant-design-vue'
+import account from '../../lib/api/account'
 
 @Component({})
 export default class LoginModal extends Vue {
@@ -9,17 +10,33 @@ export default class LoginModal extends Vue {
 
   username: string = '';
   password: string = '';
+  loading: boolean = false;
 
   login() {
+    if (this.loading) {
+      return
+    }
     if (!this.username) {
-      return message.error('请输入用户名')
+      return message.error('请输入用户名', 1.5)
     }
     if (!this.password) {
-      return message.error('请输入密码')
+      return message.error('请输入密码', 1.5)
     }
-    console.log(this.username, this.password);
-    this.$emit('login', true);
-    this.$emit('close')
+    this.loading = true;
+    account.login(this.username, this.password)
+      .then(data => {
+        if (data.success === true) {
+          localStorage.setItem('authorization', data.token)
+          this.$emit('login', true);
+          this.$emit('close')
+        } else {
+          throw new Error(data.message)
+        }
+      })
+      .catch(e => {
+        message.error(e.message || '登录失败', 1.5)
+      })
+      .finally(() => this.loading = false)
   }
 
   render(h) {
@@ -33,7 +50,7 @@ export default class LoginModal extends Vue {
 
         <a-input-password placeholder={'密码'} class={this.$style.password} onChange={e => this.password = e.target.value}/>
 
-        <a-button class={this.$style.btn} type={'primary'} onClick={() => this.login()}>登录</a-button>
+        <a-button class={this.$style.btn} type={'primary'} onClick={() => this.login()} loading={this.loading}>登录</a-button>
 
       </div>
     )

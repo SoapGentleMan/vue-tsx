@@ -58,7 +58,7 @@ export default class Result extends Vue {
   ps: number = 10;
 
   isLogin: boolean = true;
-  showLoginModal: boolean = true;
+  showLoginModal: boolean = false;
 
   created() {
     this.searchValue = this.$route.query.s as string || '';
@@ -84,8 +84,11 @@ export default class Result extends Vue {
   }
 
   search() {
-    const value = (this.$refs.input as HTMLInputElement).value;
-    location.href = 'http://localhost/r?s=' + value
+    if (!this.isLogin) {
+      this.showLoginModal = true
+      return
+    }
+    location.href = 'http://localhost/r?s=' + this.searchValue
   }
 
   render(h) {
@@ -94,7 +97,7 @@ export default class Result extends Vue {
         <a-layout-header>
           <img class={this.$style.logo} src={'//wkstatic.bdimg.com/static/wkcore/widget/search/newHeader/images/logo-wk-202010_8469520.png'}/>
           <div class={this.$style.inputBlock}>
-            <input ref={'input'} class={this.$style.input} maxlength={255}/>
+            <input class={this.$style.input} value={this.searchValue} onChange={e => this.searchValue = e.target.value} maxlength={255}/>
             <span class={this.$style.btn} onClick={() => this.search()}>搜索一下</span>
           </div>
 
@@ -145,7 +148,10 @@ export default class Result extends Vue {
                 this.resultData.map((item, index) => {
                   return (
                     <div key={index} class={this.$style.result}>
-                      <div class={this.$style.title} domPropsInnerHTML={item.titleHtml}/>
+                      <div class={this.$style.titleBlock}>
+                        <img class={this.$style.icon} src={''}/>
+                        <a class={this.$style.title} domPropsInnerHTML={item.titleHtml} href={item.link_url}/>
+                      </div>
                       <div class={this.$style.desc} domPropsInnerHTML={item.descHtml}/>
                       <div class={this.$style.line}>
                         {item.time}

@@ -1,0 +1,56 @@
+{
+  "success": true,
+  "message": "成功",
+  "docs": [
+    {
+      "type_code": "pdf",
+      "file_name": "爸爸1",
+      "link_url": "https://www.baidu.com",
+      "download_url": "https://www.baidu.com",
+      "file_time": "2018-1-8",
+      "file_abstract": "爸妈是最爱的人是最爱的人是最爱的人是最爱的人是最爱的人是最爱的人是最爱的人"
+    },
+    {
+      "type_code": "word",
+      "file_name": "爸爸2",
+      "link_url": "https://www.baidu.com",
+      "download_url": "https://www.baidu.com",
+      "file_time": "2018-1-8",
+      "file_abstract": "爸妈是最爱的人是最爱的人是最爱的人是最爱的人是最爱的是最爱的人是最爱的人是最爱的人是最爱的人是最爱的人是最爱的人"
+    },
+    {
+      "type_code": "html",
+      "file_name": "爸爸3",
+      "link_url": "https://www.baidu.com",
+      "download_url": "https://www.baidu.com",
+      "file_time": "2018-1-8",
+      "file_abstract": "是最爱的人是最爱的人是最爱的人是最爱的"
+    },
+    {
+      "type_code": "pdf",
+      "file_name": "爸爸4",
+      "link_url": "https://www.baidu.com",
+      "download_url": "https://www.baidu.com",
+      "file_time": "2018-1-8",
+      "file_abstract": "爸妈是最爱的人是最爱的人是最爱的人是最爱的人是最爱的人是最爱的人是最爱的人是最爱的人是最爱的人是最爱的人是最爱的是最爱的人是最爱的人是最爱的人是最爱的是最爱的人是最爱的人是最爱的人是最爱的"
+    },
+    {
+      "type_code": "pdf",
+      "file_name": "爸爸5",
+      "link_url": "https://www.baidu.com",
+      "download_url": "https://www.baidu.com",
+      "file_time": "2018-1-8",
+      "file_abstract": "爸妈是最爱的人是最爱的人是最爱的人是最爱的人是"
+    },
+    {
+      "type_code": "pdf",
+      "file_name": "爸爸6",
+      "link_url": "https://www.baidu.com",
+      "download_url": "https://www.baidu.com",
+      "file_time": "2018-1-8",
+      "file_abstract": "爸妈是最爱的人是最爱的人是最爱的人是最爱的人是最爱的人是最爱的人是最爱的人"
+    }
+  ],
+  "rel_words": ["爸爸", "爸妈"],
+  "pages": 1
+}

@@ -118,13 +118,13 @@ export default class Word extends Vue {
   doAction() {
     console.log(this.confirmObj);
     if (!this.confirmObj.searchWord) {
-      return message.error('请输入搜索词')
+      return message.error('请输入搜索词', 1.5)
     }
     if (!this.confirmObj.relatedWord) {
-      return message.error('请输入关联词')
+      return message.error('请输入关联词', 1.5)
     }
     if (!this.confirmObj.relation) {
-      return message.error('请输入关联度')
+      return message.error('请输入关联度', 1.5)
     }
     this.toggleConfirm('')
   }

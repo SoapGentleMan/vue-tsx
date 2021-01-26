@@ -21,7 +21,11 @@ const fetchDefault = (url, options?) => {
   if (bodyIsObject) {
     options.headers = Object.assign({}, {
       'Content-Type': 'application/json;charset=UTF-8'
-    }, options.headers);
+    }, options.headers)
+  }
+  const Authorization = localStorage.getItem('authorization');
+  if (!!Authorization) {
+    options.headers = Object.assign({}, {Authorization}, options.headers)
   }
   if (!options.noTimestamp) {
     url = url + (url.match(/\?/) ? '&' : '?') + 'timestamp=' + new Date().getTime();

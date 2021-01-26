@@ -136,10 +136,10 @@ export default class Torrent extends Vue {
   doAction() {
     console.log(this.confirmObj);
     if (!this.confirmObj.url) {
-      return message.error('请输入种子链接')
+      return message.error('请输入种子链接', 1.5)
     }
     if (!this.confirmObj.country) {
-      return message.error('请选择国家')
+      return message.error('请选择国家', 1.5)
     }
     this.toggleConfirm('')
   }

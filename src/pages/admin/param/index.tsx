@@ -108,7 +108,7 @@ export default class Param extends Vue {
   doAction() {
     console.log(this.confirmObj);
     if (!this.confirmObj.data) {
-      return message.error('请输入数据')
+      return message.error('请输入数据', 1.5)
     }
     this.toggleConfirm('')
   }

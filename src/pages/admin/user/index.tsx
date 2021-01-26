@@ -149,16 +149,16 @@ export default class User extends Vue {
   doAction() {
     console.log(this.confirmObj);
     if (!this.confirmObj.username) {
-      return message.error('请输入用户名')
+      return message.error('请输入用户名', 1.5)
     }
     if (!this.confirmObj.password) {
-      return message.error('请输入密码')
+      return message.error('请输入密码', 1.5)
     }
     if (!this.confirmObj.level) {
-      return message.error('请选择用户等级')
+      return message.error('请选择用户等级', 1.5)
     }
     if (!this.confirmObj.outdate) {
-      return message.error('请输入过期时间')
+      return message.error('请输入过期时间', 1.5)
     }
     this.toggleConfirm('')
   }

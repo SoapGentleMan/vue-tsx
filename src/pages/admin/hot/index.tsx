@@ -135,16 +135,16 @@ export default class Hot extends Vue {
   doAction() {
     console.log(this.confirmObj);
     if (!this.confirmObj.hotWord) {
-      return message.error('请输入热点词')
+      return message.error('请输入热点词', 1.5)
     }
     if (!this.confirmObj.sort) {
-      return message.error('请输入排序')
+      return message.error('请输入排序', 1.5)
     }
     if (!this.confirmObj.start) {
-      return message.error('请输入开始日期')
+      return message.error('请输入开始日期', 1.5)
     }
     if (!this.confirmObj.end) {
-      return message.error('请输入结束日期')
+      return message.error('请输入结束日期', 1.5)
     }
     this.toggleConfirm('')
   }

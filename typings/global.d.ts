@@ -5,3 +5,4 @@ declare module '*.vue' {
 
 declare const isProd: boolean;
 declare const isRelease: boolean;
+declare const SERVER: boolean;
