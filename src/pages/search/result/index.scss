@@ -11,7 +11,7 @@
   }
 
   :global(.ant-layout-content) {
-    padding-top: 64px;
+    padding-top: 94px;
   }
 }
 
@@ -67,6 +67,22 @@
   }
 }
 
+.loginBg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+
+  .login {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+  }
+}
+
 .content {
   padding-left: 170px;
 }
@@ -75,7 +91,6 @@
   width: 584px;
   border: 1px solid #e3e3e3;
   padding: 14px;
-  margin-top: 30px;
 
   .filterLine {
     margin-bottom: 12px;
@@ -99,6 +114,10 @@
     margin-right: 13px;
     font-size: 12px;
     cursor: pointer;
+
+    &:not(.selected):hover {
+      text-decoration: underline;
+    }
 
     &.selected {
       color: #fff;

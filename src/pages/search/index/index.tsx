@@ -68,6 +68,9 @@ export default class Index extends Vue {
       return this.toggleLogin()
     }
     const value = (this.$refs.input as HTMLInputElement).value;
+    if (!value) {
+      return
+    }
     location.href = 'http://localhost/r?s=' + value
   }
 

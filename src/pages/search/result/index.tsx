@@ -2,93 +2,192 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import './components'
 import LoginModal from '../../../components/login-modal/index.tsx.vue'
+import search from '../../../lib/api/search'
 
 @Component({})
 export default class Result extends Vue {
-  filterData = [
-    {
-      title: '范围',
-      options: ['全部', 'vip1', 'vip2', 'vip3']
-    },
-    {
-      title: '格式',
-      options: ['全部', 'doc', 'exle', 'aaa']
-    },
-    {
-      title: '时间',
-      options: ['全部', 'time1', 'time2', 'time3']
-    }
-  ];
-  filterValue = [0, 0, 0]
-  sortValue = '1';
+  filterData = [];
+  sortData = [];
+  filterValue = []
+  sortValue = '';
   searchValue = '';
 
-  resultData: any[] = [
-    {
-      title: '协议书模板',
-      desc: '合同编号：协议书xxx，协议xxx，巴巴爸爸爸爸爸爸爸爸爸爸爸爸爸爸合同编号：协议书xxx，协议xxx，巴巴爸爸爸爸爸爸爸爸爸爸爸爸爸爸合同编号：协议书xxx，协议xxx，巴巴爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸爸',
-      time: '2020-10-10',
-      downloadCount: '1111',
-      downloadUrl: 'xxxx'
-    },
-    {
-      title: '协议书模板',
-      desc: '合同编号：协议书xxx，协议xxx，巴巴爸爸爸爸爸爸爸爸爸爸爸爸爸爸',
-      time: '2020-10-10',
-      downloadCount: '1111',
-      downloadUrl: 'xxxx'
-    },
-    {
-      title: '协议书模板',
-      desc: '合同编号：协议书xxx，协议xxx，巴巴爸爸爸爸爸爸爸爸爸爸爸爸爸爸',
-      time: '2020-10-10',
-      downloadCount: '1111',
-      downloadUrl: 'xxxx'
-    },
-    {
-      title: '协议书模板',
-      desc: '合同编号：协议书xxx，协议xxx，巴巴爸爸爸爸爸爸爸爸爸爸爸爸爸爸',
-      time: '2020-10-10',
-      downloadCount: '1111',
-      downloadUrl: 'xxxx'
-    }
-  ]
+  iconObj = {};
+
+  resultList = [];
+
+  confLoading: boolean = false;
 
   pn: number = 1;
   ps: number = 10;
+  totalPage: number = 0;
 
-  isLogin: boolean = true;
+  isLogin: boolean = false;
   showLoginModal: boolean = false;
 
   created() {
     this.searchValue = this.$route.query.s as string || '';
-    this.sortValue = this.$route.query.o as string || '1';
-    const arr = (this.$route.query.f  as string || '').split(',');
-    this.filterValue = new Array(3).fill(0)
-      .map((item, index) => parseInt(arr[index], 10) || item)
-      .map(item => Math.min(item, 3));
+    this.sortValue = this.$route.query.o as string || '';
+    this.filterValue = (this.$route.query.f  as string || ',,').split(',');
+    this.pn = +this.$route.query.pn || 1;
 
-    this.resultData = this.modifyDataWithRelatedWord(this.resultData)
+    this.isLogin = !!localStorage.getItem('authorization');
+    if (this.isLogin) {
+      this.getSearchConf().then(() => this.getSearchResult())
+    } else {
+      this.showLoginModal = true
+    }
   }
 
-  modifyDataWithRelatedWord(data) {
-    return data.map(item => {
-      item.titleHtml = item.title.replaceAll('协议', '<em>协议</em>');
-      item.descHtml = item.desc.replaceAll('协议', '<em>协议</em>');
-      return item
+  modifyDataWithRelatedWord(data, words) {
+    try {
+      const regexp = new RegExp(words.join('|'), 'g')
+      return data.map(item => {
+        item.file_name_html = item.file_name.replaceAll(regexp, str => `<em>${str}</em>`);
+        item.file_abstract_html = item.file_abstract.replaceAll(regexp, str => `<em>${str}</em>`);
+        return item
+      })
+    } catch (e) {
+      return data
+    }
+
+  }
+
+  getSearchConf() {
+    let cache;
+    const lsData = localStorage.getItem('searchConf')
+    if (!!lsData) {
+      try {
+        const json = JSON.parse(lsData);
+        (new Date().getTime() - json.timestamp < 1000 * 3600 * 6) && (cache = json.data)
+      } catch (e) {
+        // do nothing
+      }
+    }
+    this.confLoading = true;
+    return Promise.resolve(cache || search.getSearchConf())
+      .then(data => {
+        if (data.success === true) {
+          const countryArr = [{key: '全部', value: ''}];
+          const typeArr = [{key: '全部', value: ''}];
+          const timeArr = [{key: '全部', value: ''}];
+          if (data.country_name && data.country_name.length > 0 && data.country_code && data.country_code.length > 0) {
+            countryArr.push(...data.country_name.map((item, index) => {
+              return {
+                key: item,
+                value: data.country_code[index] || ''
+              }
+            }))
+          }
+          if (data.type_name && data.type_name.length > 0 && data.type_code && data.type_code.length > 0) {
+            typeArr.push(...data.type_name.map((item, index) => {
+              !!data.type_icon[index] && this.$set(this.iconObj, data.type_code[index], data.type_icon[index])
+              return {
+                key: item,
+                value: data.type_code[index] || '',
+                icon: data.type_icon[index] || ''
+              }
+            }))
+          }
+          if (data.time_name && data.time_name.length > 0 && data.time_code && data.time_code.length > 0) {
+            timeArr.push(...data.time_name.map((item, index) => {
+              return {
+                key: item,
+                value: data.time_code[index] || ''
+              }
+            }))
+          }
+          this.filterData = [
+            {title: '国家', values: countryArr},
+            {title: '格式', values: typeArr},
+            {title: '时间', values: timeArr}
+          ];
+          this.filterData.forEach((item, index) => {
+            const filter = this.filterValue[index];
+            this.$set(this.filterValue, index, item.values.findIndex(i => i.value === filter) > -1 ? filter : '')
+          })
+          if (data.sort_name && data.sort_name.length > 0 && data.sort_type && data.sort_type.length > 0) {
+            this.sortData = data.sort_name.map((item, index) => {
+              return {
+                key: item,
+                value: data.sort_type[index] || ''
+              }
+            });
+            this.sortValue = this.sortData.findIndex(i => i.value === this.sortValue) > -1 ? this.sortValue : this.sortData[0].value
+          }
+          localStorage.setItem('searchConf', JSON.stringify({data, timestamp: new Date().getTime()}))
+        } else {
+          throw new Error(data.message)
+        }
+      })
+      .catch(e => {
+        if (e.message === '未登录') {
+          localStorage.removeItem('authorization');
+          this.isLogin = false;
+          this.showLoginModal = true;
+          throw new Error(e.message)
+        }
+      })
+      .finally(() => this.confLoading = false)
+  }
+
+  getSearchResult() {
+    return search.getSearchResult({
+      keyword: this.searchValue,
+      country_code: this.filterValue[0],
+      type_code: this.filterValue[1],
+      time_code: this.filterValue[2],
+      sort_type: this.sortValue,
+      page: this.pn,
+      size: this.ps,
+    }).then(data => {
+      if (data.success === true && data.docs && data.docs.length > 0) {
+        this.resultList = this.modifyDataWithRelatedWord(data.docs, data.rel_words);
+        this.totalPage = data.pages
+      } else {
+        throw new Error(data.message)
+      }
+    }).catch(e => {
+      if (e.message === '未登录') {
+        localStorage.removeItem('authorization');
+        this.isLogin = false;
+        this.showLoginModal = true
+      }
     })
   }
 
-  changePn() {
-    this.pn += 1
+  getSearchUrl() {
+    return `http://localhost/r?s=${this.searchValue}${
+      !!this.sortValue ? '&o=' + this.sortValue : ''
+    }${
+      this.filterValue.join(',') !== ',,' ? '&f=' + this.filterValue.join(',') : ''
+    }${
+      this.pn !== 1 ? '&pn=' + this.pn : ''
+    }`
+  }
+
+  changePage(pn) {
+    this.pn = pn;
+    location.href = this.getSearchUrl()
   }
 
   search() {
+    if (!this.searchValue || this.confLoading) {
+      return
+    }
     if (!this.isLogin) {
       this.showLoginModal = true
       return
     }
-    location.href = 'http://localhost/r?s=' + this.searchValue
+    const url = `http://localhost/r?s=${this.searchValue}`
+    if (url === location.href) {
+      return location.replace(url)
+    }
+    location.href = url
+  }
+
+  doAfterLogin() {
+    this.isLogin = true
   }
 
   render(h) {
@@ -102,68 +201,78 @@ export default class Result extends Vue {
           </div>
 
           {this.showLoginModal && <div class={this.$style.loginBg}>
-            <LoginModal class={this.$style.login} onLogin={() => this.isLogin = true} onClose={() => this.showLoginModal = false}/>
+            <LoginModal class={this.$style.login} onLogin={() => this.doAfterLogin()} onClose={() => this.showLoginModal = false}/>
           </div>}
         </a-layout-header>
 
         <a-layout-content>
           <div class={this.$style.content}>
-            <div class={this.$style.filterBox}>
+            {this.filterData.length > 0 && <div class={this.$style.filterBox}>
               {
                 this.filterData.map((item, index) => {
                   return (
                     <div key={index} class={this.$style.filterLine}>
                       <span class={this.$style.title}>{item.title}:</span>
                       {
-                        item.options.map((i, n) =>  <span key={n} class={[this.$style.option, this.filterValue[index] === n ? this.$style.selected : '']}>{i}</span>)
+                        item.values.map((i, n) => (
+                          <span key={n} class={[this.$style.option, this.filterValue[index] === i.value ? this.$style.selected : '']}
+                                onClick={() => {
+                                  if (this.filterValue[index] !== i.value) {
+                                    this.$set(this.filterValue, index, i.value);
+                                    this.changePage(1)
+                                  }
+                                }}>
+                            {i.key}
+                          </span>
+                        ))
                       }
                     </div>
                   )
                 })
               }
-            </div>
+            </div>}
 
-            <div class={this.$style.sortBox}>
+            {this.sortData.length > 0 && <div class={this.$style.sortBox}>
               <span class={this.$style.title}>排序:</span>
 
-              <input class={this.$style.radio} type={'radio'} name={'radio'} value={'1'} checked={this.sortValue === '1'}
-                     onChange={e => this.sortValue = e.target.value}/>
-              <span class={this.$style.text}>相关性</span>
-
-              <input class={this.$style.radio} type={'radio'} name={'radio'} value={'2'} checked={this.sortValue === '2'}
-                     onChange={e => this.sortValue = e.target.value}/>
-              <span class={this.$style.text}>下载量</span>
-
-              <input class={this.$style.radio} type={'radio'} name={'radio'} value={'3'} checked={this.sortValue === '3'}
-                     onChange={e => this.sortValue = e.target.value}/>
-              <span class={this.$style.text}>最新</span>
-
-              <input class={this.$style.radio} type={'radio'} name={'radio'} value={'4'} checked={this.sortValue === '4'}
-                     onChange={e => this.sortValue = e.target.value}/>
-              <span class={this.$style.text}>关联性</span>
-            </div>
+              {
+                this.sortData.map(item => [
+                  <input class={this.$style.radio} type={'radio'} name={'sort'} value={item.value} checked={this.sortValue === item.value}
+                         onChange={e => {
+                           if (this.sortValue !== e.target.value) {
+                             this.sortValue = e.target.value;
+                             this.changePage(1)
+                           }
+                         }}/>,
+                  <span class={this.$style.text}>{item.key}</span>
+                ])
+              }
+            </div>}
 
             <div class={this.$style.resultList}>
               {
-                this.resultData.map((item, index) => {
+                this.resultList.map((item, index) => {
                   return (
                     <div key={index} class={this.$style.result}>
                       <div class={this.$style.titleBlock}>
-                        <img class={this.$style.icon} src={''}/>
-                        <a class={this.$style.title} domPropsInnerHTML={item.titleHtml} href={item.link_url}/>
+                        <img class={this.$style.icon} src={this.iconObj[item.type_code] || ''}/>
+                        <a class={this.$style.title} domPropsInnerHTML={item.file_name_html} href={item.link_url}/>
                       </div>
-                      <div class={this.$style.desc} domPropsInnerHTML={item.descHtml}/>
+                      <div class={this.$style.desc} domPropsInnerHTML={item.file_abstract_html}/>
                       <div class={this.$style.line}>
-                        {item.time}
+                        {item.file_time}
                         <i class={this.$style.divider}>|</i>
-                        {item.downloadCount}
-                        <a class={this.$style.btn} href={item.downloadUrl} target={'_blank'}>马上下载</a>
+                        {item.download_times + '次下载'}
+                        {item.type_code !== 'html' && <a class={this.$style.btn} href={item.download_url} target={'_blank'}>马上下载</a>}
                       </div>
                     </div>
                   )
                 })
               }
             </div>
+
+            {this.totalPage > 0 && <a-pagination current={this.pn} pageSize={this.ps} total={this.totalPage * this.ps}
+                                                 onChange={page => this.changePage(page)}/>}
           </div>
         </a-layout-content>
       </a-layout>

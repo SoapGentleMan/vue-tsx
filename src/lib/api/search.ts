@@ -10,7 +10,7 @@ class Search {
     return fetchTimeout(`${SERVER}/search_conf`)
   }
 
-  searchContent(options) {
+  getSearchResult(options) {
     return fetchTimeout(`${SERVER}/search`, {
       method: 'POST',
       body: options
