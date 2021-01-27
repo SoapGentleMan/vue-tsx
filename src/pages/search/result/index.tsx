@@ -157,7 +157,7 @@ export default class Result extends Vue {
   }
 
   getSearchUrl() {
-    return `http://localhost/r?s=${this.searchValue}${
+    return `${CLIENT}/r?s=${this.searchValue}${
       !!this.sortValue ? '&o=' + this.sortValue : ''
     }${
       this.filterValue.join(',') !== ',,' ? '&f=' + this.filterValue.join(',') : ''
@@ -179,7 +179,7 @@ export default class Result extends Vue {
       this.showLoginModal = true
       return
     }
-    const url = `http://localhost/r?s=${this.searchValue}`
+    const url = `${CLIENT}/r?s=${this.searchValue}`
     if (url === location.href) {
       return location.replace(url)
     }

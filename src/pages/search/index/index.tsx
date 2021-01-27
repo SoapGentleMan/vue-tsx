@@ -71,7 +71,7 @@ export default class Index extends Vue {
     if (!value) {
       return
     }
-    location.href = 'http://localhost/r?s=' + value
+    location.href = `${CLIENT}/r?s=${value}`
   }
 
   toggleLogin() {
@@ -127,7 +127,7 @@ export default class Index extends Vue {
                       <div key={order} class={this.$style.hot}/>
                       :
                       <a key={order}  class={this.$style.hot}
-                         href={'http://localhost/r?s=' + this.hotWords[this.showPn - 1][cIndex]} target={'_blank'}>
+                         href={`${CLIENT}/r?s=${this.hotWords[this.showPn - 1][cIndex]}`} target={'_blank'}>
                         <span class={[this.$style.order, this.$style['order' + order]]}>{order}</span>
                         <span class={this.$style.text}>{this.hotWords[this.showPn - 1][cIndex]}</span>
                       </a>
