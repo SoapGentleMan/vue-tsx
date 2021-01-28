@@ -1,0 +1,31 @@
+{
+  "success": true,
+  "message": "成功",
+  "hotword_list": [
+    {
+      "id": 213123,
+      "text": "文件哦二姐夫",
+      "sort": 1,
+      "start_date": "2020-01-01",
+      "end_date": "2020-01-02",
+      "statue": 0
+    },
+    {
+      "id": 213123,
+      "text": "文件哦二姐夫21",
+      "sort": 2,
+      "start_date": "2020-02-01",
+      "end_date": "2020-02-02",
+      "statue": 1
+    },
+    {
+      "id": 213123,
+      "text": "文件哦二姐夫1231",
+      "sort": 3,
+      "start_date": "2020-03-01",
+      "end_date": "2020-03-02",
+      "statue": 2
+    }
+  ],
+  "pages": 2
+}

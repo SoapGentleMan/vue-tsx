@@ -1,0 +1,28 @@
+{
+  "success": true,
+  "message": "成功",
+  "conf_list": [
+    {
+      "name": "nginx",
+      "value": "范德萨会计法就",
+      "remark": "xxxxx",
+      "update_date": "2020-02-02",
+      "update_by": "ww"
+    },
+    {
+      "name": "php",
+      "value": "范德萨会计法111就",
+      "remark": "xxxxx",
+      "update_date": "2020-02-03",
+      "update_by": "ww"
+    },
+    {
+      "name": "node",
+      "value": "范德萨会22计法就",
+      "remark": "xxxxx",
+      "update_date": "2020-02-04",
+      "update_by": "ww"
+    }
+  ],
+  "pages": 2
+}

@@ -1,0 +1,25 @@
+{
+  "success": true,
+  "message": "成功",
+  "words": [
+    {
+      "username": "ww",
+      "level": 1,
+      "begin_date": "2020-02-02",
+      "expire_date": "2020-02-03"
+    },
+    {
+      "username": "ww1",
+      "level": 2,
+      "begin_date": "2020-03-02",
+      "expire_date": "2020-03-03"
+    },
+    {
+      "username": "ww2",
+      "level": 3,
+      "begin_date": "2020-04-02",
+      "expire_date": "2020-04-03"
+    }
+  ],
+  "pages": 2
+}

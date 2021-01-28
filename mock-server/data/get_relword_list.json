@@ -1,0 +1,25 @@
+{
+  "success": true,
+  "message": "成功",
+  "relword_list": [
+    {
+      "id": 213123,
+      "text": "文件哦二姐夫",
+      "search_word": "文件哦二姐夫",
+      "rel_level": 0.78
+    },
+    {
+      "id": 2222,
+      "text": "文件哦二faf姐夫",
+      "search_word": "文件哦ds二姐夫",
+      "rel_level": 2.78
+    },
+    {
+      "id": 4444,
+      "text": "文件哦二s姐夫",
+      "search_word": "文件哦s二姐夫",
+      "rel_level": 1.78
+    }
+  ],
+  "pages": 2
+}
