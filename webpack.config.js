@@ -216,6 +216,24 @@ module.exports = function makeWebpackConfig() {
           },
           warnings: false
         },
+        minify: (file, sourceMap) => {
+          const uglifyJsOptions = {
+            compress: {
+              drop_debugger: true,
+              dead_code: true,
+              unused: true
+            },
+            warnings: false
+          };
+
+          if (sourceMap) {
+            uglifyJsOptions.sourceMap = {
+              content: sourceMap,
+            };
+          }
+
+          return require('uglify-js').minify(file, uglifyJsOptions)
+        },
         extractComments: false,
         sourceMap: true,
       }),
