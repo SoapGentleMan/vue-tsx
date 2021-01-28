@@ -1,7 +1,7 @@
 {
   "success": true,
   "message": "成功",
-  "words": [
+  "users": [
     {
       "username": "ww",
       "level": 1,

@@ -2,11 +2,11 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import './components'
 import { message } from 'ant-design-vue'
-import hot from '../../../lib/api/hot'
-import moment from 'moment'
+import seed from '../../../lib/api/seed'
+import search from '../../../lib/api/search'
 
 @Component({})
-export default class Hot extends Vue {
+export default class Torrent extends Vue {
   data = [];
 
   loading: boolean = false;
@@ -14,45 +14,48 @@ export default class Hot extends Vue {
   ps: number = 10;
   totalPage: number = 0;
 
+  countryList = [];
+
   confirmLoading: boolean = false;
   showConfirm: boolean = false;
   confirmType: string = '';
   confirmObj = {
     id: '',
-    text: '',
-    start_date: '',
-    end_date: ''
+    url: '',
+    country_code: undefined,
+    act: 0
   };
   searchValue: string = '';
   searchShowValue: string = '';
 
   created() {
-    this.getHotList()
+    this.getCountryData();
+    this.getSeedList()
   }
 
   columns(h) {
     return [
       {
-        title: '热点词',
-        dataIndex: 'text',
+        title: '种子链接',
+        dataIndex: 'url',
       },
       {
-        title: '排序',
-        dataIndex: 'sort'
+        title: '国家',
+        dataIndex: 'country_name'
       },
       {
-        title: '开始日期',
-        dataIndex: 'start_date'
+        title: '创建日期',
+        dataIndex: 'created_date'
       },
       {
-        title: '结束日期',
-        dataIndex: 'end_date'
+        title: '更新日期',
+        dataIndex: 'update_date'
       },
       {
         title: '状态',
         dataIndex: 'status',
         customRender: text => {
-          return text === 0 ? '未显示' : (text === 1 ? '显示中' : '已过期')
+          return text === 0 ? '正常' : (text === 1 ? '爬取汇总' : '暂停')
         }
       },
       {
@@ -60,7 +63,7 @@ export default class Hot extends Vue {
         key: 'operate',
         customRender: data => {
           return <span>
-            <a onClick={() => this.toggleConfirm('edit', data)}>编辑</a>
+            <a onClick={() => this.toggleConfirm(data.status === 2 ? 'restore' : 'stop', data)}>{data.status === 2 ? '恢复' : '暂停'}</a>
             <a-divider type={'vertical'}/>
             <a onClick={() => this.toggleConfirm('delete', data)}>删除</a>
           </span>
@@ -69,16 +72,48 @@ export default class Hot extends Vue {
     ]
   }
 
-  getHotList() {
+  getCountryData() {
+    let cache;
+    const lsData = localStorage.getItem('countryList')
+    if (!!lsData) {
+      try {
+        const json = JSON.parse(lsData);
+        (new Date().getTime() - json.timestamp < 1000 * 3600 * 6) && (cache = json.data)
+      } catch (e) {
+        // do nothing
+      }
+    }
+    return Promise.resolve(cache || search.getSearchConf())
+      .then(data => {
+        if (data.success === true && data.country_name && data.country_name.length > 0 && data.country_code && data.country_code.length > 0) {
+          this.countryList = data.country_name.map((item, index) => {
+            return {
+              key: item,
+              value: data.country_code[index] || ''
+            }
+          })
+          localStorage.setItem('searchConf', JSON.stringify({data: this.countryList, timestamp: new Date().getTime()}))
+        } else {
+          throw new Error(data.message)
+        }
+      })
+      .catch(e => {
+        if (e.message === '未登录') {
+          this.doNoLoginAction()
+        }
+      })
+  }
+
+  getSeedList() {
     if (this.loading) {
       return
     }
     this.loading = true;
-    return hot.getHotList({
+    return seed.getSeedList({
       pn: this.pn, ps: this.ps, search: this.searchValue
     }).then(data => {
       if (data.success === true) {
-        this.data = data.hotword_list;
+        this.data = data.seed_list;
         this.totalPage = data.pages
       } else {
         throw new Error(data.message)
@@ -99,26 +134,32 @@ export default class Hot extends Vue {
 
   changePage(pn) {
     this.pn = pn;
-    this.getHotList()
+    this.getSeedList()
   }
 
   get confirmTextObj() {
     switch (this.confirmType) {
       case 'create': {
         return {
-          title: '添加热点词',
+          title: '新建种子链接',
           okText: '保存'
         }
       }
-      case 'edit': {
+      case 'stop': {
         return {
-          title: '编辑热点词',
-          okText: '保存'
+          title: '暂停爬取种子',
+          okText: '确定'
+        }
+      }
+      case 'restore': {
+        return {
+          title: '恢复爬取种子',
+          okText: '确定'
         }
       }
       case 'delete': {
         return {
-          title: '删除热点词',
+          title: '删除种子链接',
           okText: '确定'
         }
       }
@@ -134,14 +175,14 @@ export default class Hot extends Vue {
       this.confirmType = type;
       this.confirmObj = type === 'create' ? {
         id: '',
-        text: '',
-        start_date: '',
-        end_date: ''
+        url: '',
+        country_code: undefined,
+        act: 0
       } : {
         id: data.id,
-        text: data.text,
-        start_date: data.start_date,
-        end_date: data.end_date
+        url: data.url,
+        country_code: data.country_code,
+        act: type === 'stop' ? 0 : 1
       }
     }
   }
@@ -152,14 +193,11 @@ export default class Hot extends Vue {
 
   doAction() {
     console.log(this.confirmObj);
-    if (!this.confirmObj.text && this.confirmType !== 'delete') {
-      return message.error('请输入热点词', 1.5)
+    if (!this.confirmObj.url && this.confirmType === 'create') {
+      return message.error('请输入种子链接', 1.5)
     }
-    if (!this.confirmObj.start_date && this.confirmType !== 'delete') {
-      return message.error('请选择开始日期', 1.5)
-    }
-    if (!this.confirmObj.end_date && this.confirmType !== 'delete') {
-      return message.error('请选择结束日期', 1.5)
+    if (!this.confirmObj.country_code && this.confirmType === 'create') {
+      return message.error('请选择国家', 1.5)
     }
     if (this.confirmLoading) {
       return
@@ -169,33 +207,31 @@ export default class Hot extends Vue {
     let options;
     switch (this.confirmType) {
       case 'create': {
-        fetchPromise = hot.createHot;
+        fetchPromise = seed.createSeed;
         options = {
-          text: this.confirmObj.text,
-          start_date: this.confirmObj.start_date,
-          end_date: +this.confirmObj.end_date
+          url: this.confirmObj.url,
+          country_code: this.confirmObj.country_code
         }
         break
       }
-      case 'edit': {
-        fetchPromise = hot.updateHot;
+      case 'stop':
+      case 'restore': {
+        fetchPromise = seed.setSeedStatus;
         options = {
           id: this.confirmObj.id,
-          text: this.confirmObj.text,
-          start_date: this.confirmObj.start_date,
-          end_date: +this.confirmObj.end_date
+          act: this.confirmObj.act
         }
         break
       }
       case 'delete': {
-        fetchPromise = hot.deleteHot;
+        fetchPromise = seed.deleteSeed;
         options = {
           id: this.confirmObj.id
         }
         break
       }
     }
-    fetchPromise = fetchPromise.bind(hot);
+    fetchPromise = fetchPromise.bind(seed);
     return fetchPromise(options)
       .then(data => {
         if (data.success === true) {
@@ -204,7 +240,7 @@ export default class Hot extends Vue {
             this.searchShowValue = '';
             this.changePage(1)
           }
-          if (this.confirmType === 'edit' || this.confirmType === 'delete') {
+          if (this.confirmType !== 'create') {
             this.changePage(this.pn)
           }
           this.toggleConfirm('');
@@ -227,14 +263,14 @@ export default class Hot extends Vue {
   render(h) {
     return (
       <div>
-        <header class={this.$style.header}>今日热点</header>
+        <header class={this.$style.header}>种子连接</header>
 
         <div class={this.$style.line}>
-          <a-input placeholder={'搜索热点词'} value={this.searchShowValue}
+          <a-input placeholder={'搜索种子链接'} value={this.searchShowValue}
                    onPressEnter={e => this.search(e.target.value)}
                    onChange={e => this.searchShowValue = e.target.value}/>
 
-          <a-button type={'primary'} onClick={() => this.toggleConfirm('create')}>添加热点词</a-button>
+          <a-button type={'primary'} onClick={() => this.toggleConfirm('create')}>添加种子链接</a-button>
         </div>
 
         <a-table columns={this.columns(h)} dataSource={this.data}
@@ -251,24 +287,21 @@ export default class Hot extends Vue {
                  cancelText={'取消'} onCancel={() => this.toggleConfirm('')}
                  confirmLoading={false} destroyOnClose={true}>
           <a-spin spinning={this.confirmLoading}>
-            {this.confirmType !== 'delete' && <div class={this.$style.formItem}>
-              <a-input value={this.confirmObj.text} onChange={e => this.setConfirmObj('text', e.target.value)}
-                       placeholder={'热点词'}/>
+            {this.confirmType === 'create' && <div class={this.$style.formItem}>
+              <a-input value={this.confirmObj.url} onChange={e => this.setConfirmObj('url', e.target.value)}
+                       placeholder={'种子URL'}/>
             </div>}
 
-            {this.confirmType !== 'delete' && <div class={this.$style.formItem}>
-              <a-range-picker value={
-                                !!this.confirmObj.start_date && !!this.confirmObj.start_date ?
-                                  [moment(this.confirmObj.start_date), moment(this.confirmObj.end_date)] : []
-                              }
-                              allowClear={false}
-                              onChange={(dates, dateStrings) => {
-                                this.setConfirmObj('start_date', dateStrings[0]);
-                                this.setConfirmObj('end_date', dateStrings[1])
-                              }}/>
+            {this.confirmType === 'create' && <div class={this.$style.formItem}>
+              <a-select value={this.confirmObj.country_code} onChange={value => this.setConfirmObj('country_code', value)}
+                        placeholder={'国家'}>
+                {
+                  this.countryList.map(item => <a-select-option value={item.value}>{item.key}</a-select-option>)
+                }
+              </a-select>
             </div>}
 
-            {this.confirmType === 'delete' && <span class={this.$style.warnColor}>确定删除热点词？</span>}
+            {this.confirmType !== 'create' && <span class={this.$style.warnColor}>确定{this.confirmType === 'delete' ? '删除种子链接' : (this.confirmType === 'stop' ? '暂停爬取种子' : '恢复爬取种')}？</span>}
           </a-spin>
         </a-modal>
       </div>

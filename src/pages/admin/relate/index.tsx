@@ -2,11 +2,10 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import './components'
 import { message } from 'ant-design-vue'
-import hot from '../../../lib/api/hot'
-import moment from 'moment'
+import relate from '../../../lib/api/relate'
 
 @Component({})
-export default class Hot extends Vue {
+export default class Word extends Vue {
   data = [];
 
   loading: boolean = false;
@@ -20,40 +19,29 @@ export default class Hot extends Vue {
   confirmObj = {
     id: '',
     text: '',
-    start_date: '',
-    end_date: ''
+    search_word: '',
+    rel_level: 0
   };
   searchValue: string = '';
   searchShowValue: string = '';
 
   created() {
-    this.getHotList()
+    this.getRelateList()
   }
 
   columns(h) {
     return [
       {
-        title: '热点词',
+        title: '关联词',
         dataIndex: 'text',
       },
       {
-        title: '排序',
-        dataIndex: 'sort'
+        title: '搜索词',
+        dataIndex: 'search_word'
       },
       {
-        title: '开始日期',
-        dataIndex: 'start_date'
-      },
-      {
-        title: '结束日期',
-        dataIndex: 'end_date'
-      },
-      {
-        title: '状态',
-        dataIndex: 'status',
-        customRender: text => {
-          return text === 0 ? '未显示' : (text === 1 ? '显示中' : '已过期')
-        }
+        title: '相关度',
+        dataIndex: 'rel_level'
       },
       {
         title: '操作',
@@ -69,16 +57,16 @@ export default class Hot extends Vue {
     ]
   }
 
-  getHotList() {
+  getRelateList() {
     if (this.loading) {
       return
     }
     this.loading = true;
-    return hot.getHotList({
+    return relate.getRelateList({
       pn: this.pn, ps: this.ps, search: this.searchValue
     }).then(data => {
       if (data.success === true) {
-        this.data = data.hotword_list;
+        this.data = data.relword_list;
         this.totalPage = data.pages
       } else {
         throw new Error(data.message)
@@ -99,26 +87,26 @@ export default class Hot extends Vue {
 
   changePage(pn) {
     this.pn = pn;
-    this.getHotList()
+    this.getRelateList()
   }
 
   get confirmTextObj() {
     switch (this.confirmType) {
       case 'create': {
         return {
-          title: '添加热点词',
+          title: '添加关联词',
           okText: '保存'
         }
       }
       case 'edit': {
         return {
-          title: '编辑热点词',
+          title: '编辑关联词',
           okText: '保存'
         }
       }
       case 'delete': {
         return {
-          title: '删除热点词',
+          title: '删除关联词',
           okText: '确定'
         }
       }
@@ -135,13 +123,13 @@ export default class Hot extends Vue {
       this.confirmObj = type === 'create' ? {
         id: '',
         text: '',
-        start_date: '',
-        end_date: ''
+        search_word: '',
+        rel_level: ''
       } : {
         id: data.id,
         text: data.text,
-        start_date: data.start_date,
-        end_date: data.end_date
+        search_word: data.search_word,
+        rel_level: data.rel_level
       }
     }
   }
@@ -150,16 +138,31 @@ export default class Hot extends Vue {
     this.$set(this.confirmObj, type, value);
   }
 
+  checkRelLevel(value) {
+    value = +value;
+    if (!value || value < 0 || value > 1) {
+      return false
+    }
+    value = value + '';
+    if (!value.match(/^(1|0|(0\.[0-9]{2}))$/)) {
+      return false
+    }
+    return true
+  }
+
   doAction() {
     console.log(this.confirmObj);
     if (!this.confirmObj.text && this.confirmType !== 'delete') {
-      return message.error('请输入热点词', 1.5)
+      return message.error('请输入关联词', 1.5)
     }
-    if (!this.confirmObj.start_date && this.confirmType !== 'delete') {
-      return message.error('请选择开始日期', 1.5)
+    if (!this.confirmObj.search_word && this.confirmType !== 'delete') {
+      return message.error('请输入搜索词', 1.5)
     }
-    if (!this.confirmObj.end_date && this.confirmType !== 'delete') {
-      return message.error('请选择结束日期', 1.5)
+    if (!this.confirmObj.rel_level && this.confirmType !== 'delete') {
+      return message.error('请输入关联度', 1.5)
+    }
+    if (!this.checkRelLevel(this.confirmObj.rel_level) && this.confirmType !== 'delete') {
+      return message.error('关联度为0-1之间浮点数，最多两位小数', 1.5)
     }
     if (this.confirmLoading) {
       return
@@ -169,33 +172,33 @@ export default class Hot extends Vue {
     let options;
     switch (this.confirmType) {
       case 'create': {
-        fetchPromise = hot.createHot;
+        fetchPromise = relate.createRelate;
         options = {
           text: this.confirmObj.text,
-          start_date: this.confirmObj.start_date,
-          end_date: +this.confirmObj.end_date
+          search_word: this.confirmObj.search_word,
+          rel_level: +this.confirmObj.rel_level
         }
         break
       }
       case 'edit': {
-        fetchPromise = hot.updateHot;
+        fetchPromise = relate.updateRelate;
         options = {
           id: this.confirmObj.id,
           text: this.confirmObj.text,
-          start_date: this.confirmObj.start_date,
-          end_date: +this.confirmObj.end_date
+          search_word: this.confirmObj.search_word,
+          rel_level: +this.confirmObj.rel_level
         }
         break
       }
       case 'delete': {
-        fetchPromise = hot.deleteHot;
+        fetchPromise = relate.deleteRelate;
         options = {
           id: this.confirmObj.id
         }
         break
       }
     }
-    fetchPromise = fetchPromise.bind(hot);
+    fetchPromise = fetchPromise.bind(relate);
     return fetchPromise(options)
       .then(data => {
         if (data.success === true) {
@@ -227,14 +230,14 @@ export default class Hot extends Vue {
   render(h) {
     return (
       <div>
-        <header class={this.$style.header}>今日热点</header>
+        <header class={this.$style.header}>关联词管理</header>
 
         <div class={this.$style.line}>
-          <a-input placeholder={'搜索热点词'} value={this.searchShowValue}
+          <a-input placeholder={'搜索关联词'} value={this.searchShowValue}
                    onPressEnter={e => this.search(e.target.value)}
                    onChange={e => this.searchShowValue = e.target.value}/>
 
-          <a-button type={'primary'} onClick={() => this.toggleConfirm('create')}>添加热点词</a-button>
+          <a-button type={'primary'} onClick={() => this.toggleConfirm('create')}>添加关联词</a-button>
         </div>
 
         <a-table columns={this.columns(h)} dataSource={this.data}
@@ -253,22 +256,20 @@ export default class Hot extends Vue {
           <a-spin spinning={this.confirmLoading}>
             {this.confirmType !== 'delete' && <div class={this.$style.formItem}>
               <a-input value={this.confirmObj.text} onChange={e => this.setConfirmObj('text', e.target.value)}
-                       placeholder={'热点词'}/>
+                       placeholder={'关联词'}/>
             </div>}
 
             {this.confirmType !== 'delete' && <div class={this.$style.formItem}>
-              <a-range-picker value={
-                                !!this.confirmObj.start_date && !!this.confirmObj.start_date ?
-                                  [moment(this.confirmObj.start_date), moment(this.confirmObj.end_date)] : []
-                              }
-                              allowClear={false}
-                              onChange={(dates, dateStrings) => {
-                                this.setConfirmObj('start_date', dateStrings[0]);
-                                this.setConfirmObj('end_date', dateStrings[1])
-                              }}/>
+              <a-input value={this.confirmObj.search_word} onChange={e => this.setConfirmObj('search_word', e.target.value)}
+                       placeholder={'搜索词'}/>
             </div>}
 
-            {this.confirmType === 'delete' && <span class={this.$style.warnColor}>确定删除热点词？</span>}
+            {this.confirmType !== 'delete' && <div class={this.$style.formItem}>
+              <a-input value={this.confirmObj.rel_level} onChange={e => this.setConfirmObj('rel_level', e.target.value)}
+                       placeholder={'关联度'}/>
+            </div>}
+
+            {this.confirmType === 'delete' && <span class={this.$style.warnColor}>确定删除关联词？</span>}
           </a-spin>
         </a-modal>
       </div>

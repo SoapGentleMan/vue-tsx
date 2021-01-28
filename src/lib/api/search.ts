@@ -3,7 +3,7 @@ import {fetchTimeout} from '../fetch'
 class Search {
   getHotWords(options) {
     const {pn, ps} = options
-    return fetchTimeout(`${SERVER}//hot_words?page=${pn}&size=${ps}`)
+    return fetchTimeout(`${SERVER}/hot_words?page=${pn}&size=${ps}`)
   }
 
   getSearchConf() {
