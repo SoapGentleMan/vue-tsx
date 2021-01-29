@@ -30,7 +30,7 @@ module.exports = function makeWebpackConfig() {
 
   config.output = {
     path: path.join(__dirname, './dist'),
-    publicPath: isRelease ? '/' : (isProd ? '/' : '/'),
+    publicPath: isProd ? './' : '/',
     filename: isProd ? 'js/[name].[hash].js' : '[name].bundle.js',
     chunkFilename: isProd ? 'js/[name].[hash].js' : '[name].bundle.js'
   };
@@ -187,8 +187,8 @@ module.exports = function makeWebpackConfig() {
     })),
 
     new webpack.DefinePlugin({
-      CLIENT: JSON.stringify('http://localhost'),
-      SERVER: JSON.stringify('http://localhost:8081'),
+      CLIENT: JSON.stringify(isProd ? '.' : ''),
+      SERVER: JSON.stringify(isProd ? 'http://localhost:8081' : 'http://localhost:8081'),
       isProd: JSON.stringify(isProd),
       isRelease: JSON.stringify(isRelease)
     }),
@@ -203,8 +203,7 @@ module.exports = function makeWebpackConfig() {
   );
 
   const adminPageArr = fs.readdirSync('./src/pages/admin', {withFileTypes: true}).filter(item => item.isDirectory()).map(item => item.name);
-  const searchPageArr = fs.readdirSync('./src/pages/search', {withFileTypes: true}).filter(item => item.isDirectory()).map(item => item.name);
-  const pageAll = [].concat(pageArr, adminPageArr, searchPageArr).filter(item => item !== 'search');
+  const pageAll = [].concat(pageArr, adminPageArr);
   config.optimization = {
     minimizer: [
       new UglifyPlugin({

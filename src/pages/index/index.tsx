@@ -1,9 +1,8 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import './components'
-import LoginModal from '../../../components/login-modal/index.tsx.vue'
-import account from '../../../lib/api/account'
-import search from '../../../lib/api/search'
+import LoginModal from '../../components/login-modal/index.tsx.vue'
+import account from '../../lib/api/account'
+import search from '../../lib/api/search'
 
 @Component({})
 export default class Index extends Vue {
@@ -71,7 +70,7 @@ export default class Index extends Vue {
     if (!value) {
       return
     }
-    location.href = `${CLIENT}/r?s=${value}`
+    location.href = `${CLIENT}/search.html?s=${value}`
   }
 
   toggleLogin() {
@@ -127,7 +126,7 @@ export default class Index extends Vue {
                       <div key={order} class={this.$style.hot}/>
                       :
                       <a key={order}  class={this.$style.hot}
-                         href={`${CLIENT}/r?s=${this.hotWords[this.showPn - 1][cIndex]}`} target={'_blank'}>
+                         href={`${CLIENT}/search.html?s=${this.hotWords[this.showPn - 1][cIndex]}`} target={'_blank'}>
                         <span class={[this.$style.order, this.$style['order' + order]]}>{order}</span>
                         <span class={this.$style.text}>{this.hotWords[this.showPn - 1][cIndex]}</span>
                       </a>

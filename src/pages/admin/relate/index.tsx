@@ -82,7 +82,7 @@ export default class Word extends Vue {
 
   doNoLoginAction() {
     localStorage.removeItem('authorization');
-    location.href = `${CLIENT}/login`
+    location.href = `${CLIENT}/login.html`
   }
 
   changePage(pn) {

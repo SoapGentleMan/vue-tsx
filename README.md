@@ -32,5 +32,8 @@ npm run mock-server
 
 ## 其他
 ```
-无
+搜索首页：/index.html
+搜索结果页：/search.html
+登录页：/login.html
+后台页：/admin.html
 ```

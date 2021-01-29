@@ -5,7 +5,7 @@ import LoginModal from '../../components/login-modal/index.tsx.vue'
 @Component({})
 export default class Admin extends Vue {
   goAdmin() {
-    location.replace(`${CLIENT}/admin`)
+    location.replace(`${CLIENT}/admin.html`)
   }
 
   render(h) {
