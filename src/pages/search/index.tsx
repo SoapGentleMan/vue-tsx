@@ -3,6 +3,7 @@ import Component from 'vue-class-component'
 import './components'
 import LoginModal from '../../components/login-modal/index.tsx.vue'
 import search from '../../lib/api/search'
+import account from '../../lib/api/account'
 
 @Component({})
 export default class Result extends Vue {
@@ -12,9 +13,8 @@ export default class Result extends Vue {
   sortValue = '';
   searchValue = '';
 
-  iconObj = {};
-
   resultList = [];
+  relWords = [];
 
   confLoading: boolean = false;
 
@@ -23,6 +23,7 @@ export default class Result extends Vue {
   totalPage: number = 0;
 
   isLogin: boolean = false;
+  username: string = '';
   showLoginModal: boolean = false;
 
   created() {
@@ -34,6 +35,7 @@ export default class Result extends Vue {
 
     this.isLogin = !!localStorage.getItem('authorization');
     if (this.isLogin) {
+      this.username = localStorage.getItem('username') || '';
       this.getSearchConf().then(() => this.getSearchResult())
     } else {
       this.showLoginModal = true
@@ -102,7 +104,6 @@ export default class Result extends Vue {
           }
           if (data.type_name && data.type_name.length > 0 && data.type_code && data.type_code.length > 0) {
             typeArr.push(...data.type_name.map((item, index) => {
-              !!data.type_icon[index] && this.$set(this.iconObj, data.type_code[index], data.type_icon[index])
               return {
                 key: item,
                 value: data.type_code[index] || '',
@@ -164,6 +165,7 @@ export default class Result extends Vue {
     }).then(data => {
       if (data.success === true && data.docs && data.docs.length > 0) {
         this.resultList = this.modifyDataWithRelatedWord(data.docs, data.rel_words);
+        this.relWords = data.rel_words;
         this.totalPage = data.pages
       } else {
         throw new Error(data.message)
@@ -207,8 +209,19 @@ export default class Result extends Vue {
     location.href = url
   }
 
+  toggleLogin() {
+    if (this.isLogin) {
+      account.logout();
+      localStorage.removeItem('authorization');
+      this.isLogin = false
+    } else {
+      this.showLoginModal = true
+    }
+  }
+
   doAfterLogin() {
-    this.isLogin = true
+    this.isLogin = true;
+    this.username = localStorage.getItem('username') || '';
   }
 
   render(h) {
@@ -220,6 +233,11 @@ export default class Result extends Vue {
             <input class={this.$style.input} value={this.searchValue} onChange={e => this.searchValue = e.target.value} maxlength={255}/>
             <span class={this.$style.btn} onClick={() => this.search()}>搜索一下</span>
           </div>
+
+          {this.isLogin && <div class={this.$style.userBlock}>
+            <span class={this.$style.username}>{this.username}</span>
+            <a-button type={'primary'} class={this.$style.loginBtn} onClick={() => this.toggleLogin()}>登出</a-button>
+          </div>}
 
           {this.showLoginModal && <div class={this.$style.loginBg}>
             <LoginModal class={this.$style.login} onLogin={() => this.doAfterLogin()} onClose={() => this.showLoginModal = false}/>
@@ -276,7 +294,7 @@ export default class Result extends Vue {
                   return (
                     <div key={index} class={this.$style.result}>
                       <div class={this.$style.titleBlock}>
-                        <img class={this.$style.icon} src={this.iconObj[item.type_code] || ''}/>
+                        <img class={this.$style.icon} src={item.type_icon}/>
                         <a class={this.$style.title} domPropsInnerHTML={item.file_name_html} href={item.link_url}/>
                       </div>
                       <div class={this.$style.desc} domPropsInnerHTML={item.file_abstract_html}/>
@@ -290,6 +308,21 @@ export default class Result extends Vue {
                   )
                 })
               }
+            </div>
+
+            <div class={this.$style.relWordBlock}>
+              <p class={this.$style.title}>相关搜索</p>
+              <div class={this.$style.wordList}>
+                {
+                  this.relWords.map((item, index) => {
+                    return (
+                      <span key={index} class={this.$style.word}>
+                        <a href={`${CLIENT}/search.html?s=${item}`} target={'_blank'}>{item}</a>
+                      </span>
+                    )
+                  })
+                }
+              </div>
             </div>
 
             {this.totalPage > 0 && <a-pagination current={this.pn} pageSize={this.ps} total={this.totalPage * this.ps}

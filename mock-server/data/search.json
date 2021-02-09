@@ -5,6 +5,7 @@
     {
       "type_code": "pdf",
       "file_name": "爸爸1",
+      "type_icon":"http://demo.com:8081/css/word.png",
       "link_url": "https://www.baidu.com",
       "download_url": "https://www.baidu.com",
       "file_time": "2018-1-8",
@@ -14,6 +15,7 @@
     {
       "type_code": "word",
       "file_name": "爸爸2",
+      "type_icon":"http://demo.com:8081/css/pdf.png",
       "link_url": "https://www.baidu.com",
       "download_url": "https://www.baidu.com",
       "file_time": "2018-1-8",
@@ -23,6 +25,7 @@
     {
       "type_code": "html",
       "file_name": "爸爸3",
+      "type_icon":"http://demo.com:8081/css/pdf.png",
       "link_url": "https://www.baidu.com",
       "download_url": "https://www.baidu.com",
       "file_time": "2018-1-8",
@@ -32,6 +35,7 @@
     {
       "type_code": "pdf",
       "file_name": "爸爸4",
+      "type_icon":"http://demo.com:8081/css/pdf.png",
       "link_url": "https://www.baidu.com",
       "download_url": "https://www.baidu.com",
       "file_time": "2018-1-8",
@@ -41,6 +45,7 @@
     {
       "type_code": "pdf",
       "file_name": "爸爸5",
+      "type_icon":"http://demo.com:8081/css/pdf.png",
       "link_url": "https://www.baidu.com",
       "download_url": "https://www.baidu.com",
       "file_time": "2018-1-8",
@@ -50,6 +55,7 @@
     {
       "type_code": "pdf",
       "file_name": "爸爸6",
+      "type_icon":"http://demo.com:8081/css/pdf.png",
       "link_url": "https://www.baidu.com",
       "download_url": "https://www.baidu.com",
       "file_time": "2018-1-8",

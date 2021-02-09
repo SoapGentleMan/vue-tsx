@@ -27,6 +27,7 @@ export default class LoginModal extends Vue {
       .then(data => {
         if (data.success === true) {
           localStorage.setItem('authorization', data.token)
+          localStorage.setItem('username', this.username)
           this.$emit('login', true);
           this.$emit('close')
         } else {

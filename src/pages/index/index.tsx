@@ -14,11 +14,13 @@ export default class Index extends Vue {
   showPn: number = 0;
 
   isLogin: boolean = false;
+  username: string = '';
   showLoginModal: boolean = false;
 
   created() {
     this.isLogin = !!localStorage.getItem('authorization');
     if (this.isLogin) {
+      this.username = localStorage.getItem('username') || '';
       this.getHotWord()
     }
   }
@@ -86,6 +88,7 @@ export default class Index extends Vue {
 
   doAfterLogin() {
     this.isLogin = true;
+    this.username = localStorage.getItem('username') || '';
     this.toggleHotWords()
   }
 
@@ -93,6 +96,7 @@ export default class Index extends Vue {
     return (
       <a-layout class={this.$style.layout}>
         <a-layout-header>
+          {this.isLogin && <span class={this.$style.username}>{this.username}</span>}
           <a-button type={'primary'} class={this.$style.loginBtn} onClick={() => this.toggleLogin()}>{this.isLogin ? '登出' : '登录'}</a-button>
 
           {this.showLoginModal && <div class={this.$style.loginBg}>
