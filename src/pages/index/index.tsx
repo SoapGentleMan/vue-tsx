@@ -3,6 +3,7 @@ import Component from 'vue-class-component'
 import LoginModal from '../../components/login-modal/index.tsx.vue'
 import account from '../../lib/api/account'
 import search from '../../lib/api/search'
+import User from '../admin/user'
 
 @Component({})
 export default class Index extends Vue {
@@ -15,12 +16,14 @@ export default class Index extends Vue {
 
   isLogin: boolean = false;
   username: string = '';
+  userRole: string = '';
   showLoginModal: boolean = false;
 
   created() {
     this.isLogin = !!localStorage.getItem('authorization');
     if (this.isLogin) {
       this.username = localStorage.getItem('username') || '';
+      this.getUserStatus();
       this.getHotWord()
     }
   }
@@ -72,7 +75,7 @@ export default class Index extends Vue {
     if (!value) {
       return
     }
-    location.href = `${CLIENT}/search.html?s=${value}`
+    location.href = `${CLIENT}/search?s=${value}`
   }
 
   toggleLogin() {
@@ -89,14 +92,42 @@ export default class Index extends Vue {
   doAfterLogin() {
     this.isLogin = true;
     this.username = localStorage.getItem('username') || '';
+    this.getUserStatus();
     this.toggleHotWords()
+  }
+
+  getUserStatus() {
+    return account.getUserStatus()
+      .then(data => {
+        if (data.success === true) {
+          if (data.user_role === 'GUEST') {
+            throw new Error('未登录')
+          }
+          this.userRole = data.user_role
+        } else {
+          throw new Error(data.message)
+        }
+      })
+      .catch(e => {
+        if (e.message === '未登录') {
+          localStorage.removeItem('authorization');
+          this.isLogin = false
+        }
+      })
+  }
+
+  usernameClick() {
+    if (this.userRole === 'ADMIN') {
+      window.open(`${CLIENT}/admin`, '_blank')
+    }
   }
 
   render(h) {
     return (
       <a-layout class={this.$style.layout}>
         <a-layout-header>
-          {this.isLogin && <span class={this.$style.username}>{this.username}</span>}
+          {this.isLogin && <span class={[this.$style.username, this.userRole === 'ADMIN' ? this.$style.admin : '']}
+                                 onClick={() => this.usernameClick()}>{this.username}</span>}
           <a-button type={'primary'} class={this.$style.loginBtn} onClick={() => this.toggleLogin()}>{this.isLogin ? '登出' : '登录'}</a-button>
 
           {this.showLoginModal && <div class={this.$style.loginBg}>
@@ -106,7 +137,7 @@ export default class Index extends Vue {
 
         <a-layout-content>
           <div class={this.$style.content}>
-            <img class={this.$style.logo} src={'//www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png'}/>
+            <img class={this.$style.logo} src={require('../../images/logo.jpg')}/>
 
             <div class={this.$style.inputBlock}>
               <input ref={'input'} class={this.$style.input} maxlength={255}/>
@@ -130,7 +161,7 @@ export default class Index extends Vue {
                       <div key={order} class={this.$style.hot}/>
                       :
                       <a key={order}  class={this.$style.hot}
-                         href={`${CLIENT}/search.html?s=${this.hotWords[this.showPn - 1][cIndex]}`} target={'_blank'}>
+                         href={`${CLIENT}/search?s=${this.hotWords[this.showPn - 1][cIndex]}`} target={'_blank'}>
                         <span class={[this.$style.order, this.$style['order' + order]]}>{order}</span>
                         <span class={this.$style.text}>{this.hotWords[this.showPn - 1][cIndex]}</span>
                       </a>

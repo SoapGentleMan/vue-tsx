@@ -15,6 +15,10 @@ class Account {
       method: 'POST'
     })
   }
+
+  getUserStatus() {
+    return fetchTimeout(`${SERVER}/user_profile`)
+  }
 }
 
 export default new Account()

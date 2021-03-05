@@ -94,7 +94,7 @@ export default class Hot extends Vue {
 
   doNoLoginAction() {
     localStorage.removeItem('authorization');
-    location.href = `${CLIENT}/login.html`
+    location.href = `${CLIENT}/login`
   }
 
   changePage(pn) {

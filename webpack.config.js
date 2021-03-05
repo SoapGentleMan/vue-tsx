@@ -267,8 +267,8 @@ module.exports = function makeWebpackConfig() {
       rewrites:  [
         {from: /^\/login$/, to: '/login.html'},
         {from: /^\/admin$/, to: '/admin.html'},
-        {from: /^\/$/, to: '/search.html'},
-        {from: /^\/r$/, to: '/search.html'}
+        {from: /^\/search$/, to: '/search.html'},
+        {from: /^.*$/, to: '/index.html'}
         ]
     },
     stats: {

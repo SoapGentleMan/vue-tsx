@@ -24,6 +24,7 @@ export default class Result extends Vue {
 
   isLogin: boolean = false;
   username: string = '';
+  userRole: string = '';
   showLoginModal: boolean = false;
 
   created() {
@@ -36,6 +37,7 @@ export default class Result extends Vue {
     this.isLogin = !!localStorage.getItem('authorization');
     if (this.isLogin) {
       this.username = localStorage.getItem('username') || '';
+      this.getUserStatus();
       this.getSearchConf().then(() => this.getSearchResult())
     } else {
       this.showLoginModal = true
@@ -180,7 +182,7 @@ export default class Result extends Vue {
   }
 
   getSearchUrl() {
-    return `${CLIENT}/search.html?s=${this.searchValue}${
+    return `${CLIENT}/search?s=${this.searchValue}${
       !!this.sortValue ? '&o=' + this.sortValue : ''
     }${
       this.filterValue.join(',') !== ',,' ? '&f=' + this.filterValue.join(',') : ''
@@ -202,7 +204,7 @@ export default class Result extends Vue {
       this.showLoginModal = true
       return
     }
-    const url = `${CLIENT}/search.html?s=${this.searchValue}`
+    const url = `${CLIENT}/search?s=${this.searchValue}`
     if (url === location.href) {
       return location.replace(url)
     }
@@ -213,7 +215,8 @@ export default class Result extends Vue {
     if (this.isLogin) {
       account.logout();
       localStorage.removeItem('authorization');
-      this.isLogin = false
+      this.isLogin = false;
+      location.replace(`${CLIENT}/`)
     } else {
       this.showLoginModal = true
     }
@@ -222,20 +225,48 @@ export default class Result extends Vue {
   doAfterLogin() {
     this.isLogin = true;
     this.username = localStorage.getItem('username') || '';
+    this.getUserStatus()
+  }
+
+  getUserStatus() {
+    return account.getUserStatus()
+      .then(data => {
+        if (data.success === true) {
+          if (data.user_role === 'GUEST') {
+            throw new Error('未登录')
+          }
+          this.userRole = data.user_role
+        } else {
+          throw new Error(data.message)
+        }
+      })
+      .catch(e => {
+        if (e.message === '未登录') {
+          localStorage.removeItem('authorization');
+          this.isLogin = false
+        }
+      })
+  }
+
+  usernameClick() {
+    if (this.userRole === 'ADMIN') {
+      window.open(`${CLIENT}/admin`, '_blank')
+    }
   }
 
   render(h) {
     return (
       <a-layout class={this.$style.layout}>
         <a-layout-header>
-          <img class={this.$style.logo} src={'//wkstatic.bdimg.com/static/wkcore/widget/search/newHeader/images/logo-wk-202010_8469520.png'}/>
+          <img class={this.$style.logo} src={require('../../images/logo.jpg')}/>
           <div class={this.$style.inputBlock}>
             <input class={this.$style.input} value={this.searchValue} onChange={e => this.searchValue = e.target.value} maxlength={255}/>
             <span class={this.$style.btn} onClick={() => this.search()}>搜索一下</span>
           </div>
 
           {this.isLogin && <div class={this.$style.userBlock}>
-            <span class={this.$style.username}>{this.username}</span>
+            <span class={[this.$style.username, this.userRole === 'ADMIN' ? this.$style.admin : '']}
+                  onClick={() => this.usernameClick()}>{this.username}</span>
             <a-button type={'primary'} class={this.$style.loginBtn} onClick={() => this.toggleLogin()}>登出</a-button>
           </div>}
 
@@ -288,7 +319,9 @@ export default class Result extends Vue {
               }
             </div>}
 
-            <div class={this.$style.resultList}>
+            {this.resultList.length === 0 && <div class={this.$style.noDataBlock}>未查询到相关数据</div>}
+
+            {this.resultList.length > 0 && <div class={this.$style.resultList}>
               {
                 this.resultList.map((item, index) => {
                   return (
@@ -308,22 +341,22 @@ export default class Result extends Vue {
                   )
                 })
               }
-            </div>
+            </div>}
 
-            <div class={this.$style.relWordBlock}>
+            {this.relWords.length > 0 && <div class={this.$style.relWordBlock}>
               <p class={this.$style.title}>相关搜索</p>
               <div class={this.$style.wordList}>
                 {
                   this.relWords.map((item, index) => {
                     return (
                       <span key={index} class={this.$style.word}>
-                        <a href={`${CLIENT}/search.html?s=${item}`} target={'_blank'}>{item}</a>
+                        <a href={`${CLIENT}/search?s=${item}`} target={'_blank'}>{item}</a>
                       </span>
                     )
                   })
                 }
               </div>
-            </div>
+            </div>}
 
             {this.totalPage > 0 && <a-pagination current={this.pn} pageSize={this.ps} total={this.totalPage * this.ps}
                                                  onChange={page => this.changePage(page)}/>}
