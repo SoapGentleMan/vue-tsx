@@ -13,6 +13,7 @@ export default class Result extends Vue {
   sortValue = '';
   searchValue = '';
 
+  resultLoading: boolean = false;
   resultList = [];
   relWords = [];
 
@@ -64,7 +65,7 @@ export default class Result extends Vue {
     return query
   }
 
-  modifyDataWithRelatedWord(data, words) {
+  modifyDataWithHighLightWord(data, words) {
     try {
       const regexp = new RegExp(words.join('|'), 'g')
       return data.map(item => {
@@ -156,6 +157,7 @@ export default class Result extends Vue {
   }
 
   getSearchResult() {
+    this.resultLoading = true;
     return search.getSearchResult({
       keyword: this.searchValue,
       country_code: this.filterValue[0],
@@ -166,7 +168,7 @@ export default class Result extends Vue {
       size: this.ps,
     }).then(data => {
       if (data.success === true && data.docs && data.docs.length > 0) {
-        this.resultList = this.modifyDataWithRelatedWord(data.docs, data.rel_words);
+        this.resultList = this.modifyDataWithHighLightWord(data.docs, data.highlight_words);
         this.relWords = data.rel_words;
         this.totalPage = data.pages
       } else {
@@ -178,7 +180,7 @@ export default class Result extends Vue {
         this.isLogin = false;
         this.showLoginModal = true
       }
-    })
+    }).finally(() => this.resultLoading = false)
   }
 
   getSearchUrl() {
@@ -319,7 +321,7 @@ export default class Result extends Vue {
               }
             </div>}
 
-            {this.resultList.length === 0 && <div class={this.$style.noDataBlock}>未查询到相关数据</div>}
+            {this.resultList.length === 0 && <div class={this.$style.noDataBlock}>{this.resultLoading ? '查询中...' : '未查询到相关数据'}</div>}
 
             {this.resultList.length > 0 && <div class={this.$style.resultList}>
               {

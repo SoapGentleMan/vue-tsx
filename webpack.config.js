@@ -188,7 +188,7 @@ module.exports = function makeWebpackConfig() {
 
     new webpack.DefinePlugin({
       CLIENT: JSON.stringify(isProd ? '.' : ''),
-      SERVER: JSON.stringify(isProd ? 'http://localhost:8081' : 'http://localhost:8081'),
+      SERVER: JSON.stringify(isProd ? 'http://service.changjing-data.com:8081' : 'http://localhost:8081'),
       isProd: JSON.stringify(isProd),
       isRelease: JSON.stringify(isRelease)
     }),
