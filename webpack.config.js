@@ -7,6 +7,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const UglifyPlugin = require('uglifyjs-webpack-plugin');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const StyleLintPlugin = require('stylelint-webpack-plugin');
+const FileManagerPlugin = require('filemanager-webpack-plugin');
 
 const isProd = process.env.NODE_ENV !== 'development';
 const isRelease = process.env.NODE_ENV === 'release';
@@ -30,7 +31,7 @@ module.exports = function makeWebpackConfig() {
 
   config.output = {
     path: path.join(__dirname, './dist'),
-    publicPath: isProd ? './' : '/',
+    publicPath: isProd ? 'http://changjing-data.com/' : '/',
     filename: isProd ? 'js/[name].[hash].js' : '[name].bundle.js',
     chunkFilename: isProd ? 'js/[name].[hash].js' : '[name].bundle.js'
   };
@@ -141,9 +142,7 @@ module.exports = function makeWebpackConfig() {
             }
           }
         ],
-        exclude: [
-          path.resolve(__dirname, './src/images/login')
-        ]
+        exclude: []
       },
       {
         test: /\.(png|jpg|jpeg|gif|svg)(\?.+)?$/,
@@ -156,10 +155,8 @@ module.exports = function makeWebpackConfig() {
             }
           }
         ],
-        include: [
-          path.resolve(__dirname, './src/images/login')
-        ]
-      },
+        include: []
+      }
       // {
       //   test: /\.html/,
       //   use: [
@@ -199,7 +196,17 @@ module.exports = function makeWebpackConfig() {
 
     new StyleLintPlugin({
       files: ['src/**/*.{vue,css,scss}']
-    })
+    }),
+
+    new FileManagerPlugin({
+      events: {
+        onEnd: {
+          copy: [
+            { source: './src/images/search/*.png', destination: './dist/img' },
+          ]
+        },
+      },
+    }),
   );
 
   const adminPageArr = fs.readdirSync('./src/pages/admin', {withFileTypes: true}).filter(item => item.isDirectory()).map(item => item.name);
