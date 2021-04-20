@@ -55,7 +55,7 @@ export default class Torrent extends Vue {
         title: '状态',
         dataIndex: 'status',
         customRender: text => {
-          return text === 0 ? '正常' : (text === 1 ? '爬取汇总' : '暂停')
+          return text === 0 ? '待爬取' : (text === 1 ? '爬取中' : '已完成')
         }
       },
       {
