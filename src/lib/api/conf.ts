@@ -7,10 +7,9 @@ class Param {
   }
 
   updateConf(options) {
-    const {name, value} = options
     return fetchTimeout(`${SERVER}/admin/update_conf`, {
       method: 'POST',
-      body: {name, value}
+      body: options
     })
   }
 }

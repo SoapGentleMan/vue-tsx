@@ -7,18 +7,16 @@ class User {
   }
 
   createUser(options) {
-    const {username, password, level} = options
     return fetchTimeout(`${SERVER}/admin/add_user`, {
       method: 'POST',
-      body: {username, password, level}
+      body: options
     })
   }
 
   updateUser(options) {
-    const {username, level, expire_date} = options
     return fetchTimeout(`${SERVER}/admin/update_user`, {
       method: 'POST',
-      body: {username, level, expire_date}
+      body: options
     })
   }
 
@@ -28,18 +26,16 @@ class User {
   }
 
   deleteUser(options) {
-    const {username} = options
     return fetchTimeout(`${SERVER}/admin/del_user`, {
       method: 'POST',
-      body: {username}
+      body: options
     })
   }
 
   resetUserPswd(options) {
-    const {username, password} = options
     return fetchTimeout(`${SERVER}/reset_user_pswd`, {
       method: 'POST',
-      body: {username, password}
+      body: options
     })
   }
 }

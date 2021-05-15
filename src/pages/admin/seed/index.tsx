@@ -4,6 +4,7 @@ import './components'
 import { message } from 'ant-design-vue'
 import seed from '../../../lib/api/seed'
 import search from '../../../lib/api/search'
+import searchAdmin from '../../../lib/api/search-admin'
 
 @Component({})
 export default class Torrent extends Vue {
@@ -15,6 +16,7 @@ export default class Torrent extends Vue {
   totalPage: number = 0;
 
   countryList = [];
+  directionList = [];
 
   confirmLoading: boolean = false;
   showConfirm: boolean = false;
@@ -23,6 +25,7 @@ export default class Torrent extends Vue {
     id: '',
     url: '',
     country_code: undefined,
+    search_direction: [],
     act: 0
   };
   searchValue: string = '';
@@ -30,6 +33,7 @@ export default class Torrent extends Vue {
 
   created() {
     this.getCountryData();
+    this.getDirectionData();
     this.getSeedList()
   }
 
@@ -42,6 +46,14 @@ export default class Torrent extends Vue {
       {
         title: '国家',
         dataIndex: 'country_name'
+      },
+      {
+        title: '搜索方向',
+        dataIndex: 'search_direction',
+        ellipsis: true,
+        customRender: data => {
+          return data.length === 0 ? '无' : data.join('、')
+        }
       },
       {
         title: '创建日期',
@@ -63,7 +75,7 @@ export default class Torrent extends Vue {
         key: 'operate',
         customRender: data => {
           return <span>
-            <a onClick={() => this.toggleConfirm(data.status === 2 ? 'restore' : 'stop', data)}>{data.status === 2 ? '恢复' : '暂停'}</a>
+            <a onClick={() => this.toggleConfirm(data.status === 1 ? 'stop' : 'restore', data)}>{data.status === 1 ? '停止' : '开始'}</a>
             <a-divider type={'vertical'}/>
             <a onClick={() => this.toggleConfirm('delete', data)}>删除</a>
           </span>
@@ -72,13 +84,42 @@ export default class Torrent extends Vue {
     ]
   }
 
+  getDirectionData() {
+    let cache;
+    let timestamp;
+    const lsData = localStorage.getItem('directionList')
+    if (!!lsData) {
+      try {
+        const json = JSON.parse(lsData);
+        (new Date().getTime() - json.timestamp < 1000 * 3600 * 6) && (cache = json.data) && (timestamp = json.timestamp)
+      } catch (e) {
+        // do nothing
+      }
+    }
+    return Promise.resolve(cache || searchAdmin.getSearchDirection())
+      .then(data => {
+        if (data.success === true && data.data && data.data.length > 0) {
+          this.directionList = data.data.map((item, index) => {
+            return {
+              key: item,
+              value: item
+            }
+          })
+          localStorage.setItem('directionList', JSON.stringify({data, timestamp: timestamp || new Date().getTime()}))
+        } else {
+          throw new Error(data.message)
+        }
+      })
+  }
+
   getCountryData() {
     let cache;
+    let timestamp;
     const lsData = localStorage.getItem('countryList')
     if (!!lsData) {
       try {
         const json = JSON.parse(lsData);
-        (new Date().getTime() - json.timestamp < 1000 * 3600 * 6) && (cache = json.data)
+        (new Date().getTime() - json.timestamp < 1000 * 3600 * 6) && (cache = json.data) && (timestamp = json.timestamp)
       } catch (e) {
         // do nothing
       }
@@ -92,7 +133,7 @@ export default class Torrent extends Vue {
               value: data.country_code[index] || ''
             }
           })
-          localStorage.setItem('searchConf', JSON.stringify({data: this.countryList, timestamp: new Date().getTime()}))
+          localStorage.setItem('countryList', JSON.stringify({data, timestamp: timestamp || new Date().getTime()}))
         } else {
           throw new Error(data.message)
         }
@@ -177,11 +218,13 @@ export default class Torrent extends Vue {
         id: '',
         url: '',
         country_code: undefined,
+        search_direction: [],
         act: 0
       } : {
         id: data.id,
         url: data.url,
         country_code: data.country_code,
+        search_direction: data.search_direction,
         act: type === 'stop' ? 0 : 1
       }
     }
@@ -199,6 +242,9 @@ export default class Torrent extends Vue {
     if (!this.confirmObj.country_code && this.confirmType === 'create') {
       return message.error('请选择国家', 1.5)
     }
+    if (this.confirmObj.search_direction.length === 0 && this.confirmType === 'create') {
+      return message.error('请选择搜索方向', 1.5)
+    }
     if (this.confirmLoading) {
       return
     }
@@ -210,7 +256,8 @@ export default class Torrent extends Vue {
         fetchPromise = seed.createSeed;
         options = {
           url: this.confirmObj.url,
-          country_code: this.confirmObj.country_code
+          country_code: this.confirmObj.country_code,
+          search_direction: this.confirmObj.search_direction
         }
         break
       }
@@ -301,7 +348,17 @@ export default class Torrent extends Vue {
               </a-select>
             </div>}
 
-            {this.confirmType !== 'create' && <span class={this.$style.warnColor}>确定{this.confirmType === 'delete' ? '删除种子链接' : (this.confirmType === 'stop' ? '暂停爬取种子' : '恢复爬取种')}？</span>}
+            {this.confirmType === 'create' && <div class={this.$style.formItem}>
+              <a-select mode={'multiple'} value={this.confirmObj.search_direction}
+                        onChange={value => this.setConfirmObj('search_direction', value)}
+                        placeholder={'搜索方向'}>
+                {
+                  this.directionList.map(item => <a-select-option value={item.value}>{item.key}</a-select-option>)
+                }
+              </a-select>
+            </div>}
+
+            {this.confirmType !== 'create' && <span class={this.$style.warnColor}>确定{this.confirmType === 'delete' ? '删除种子链接' : (this.confirmType === 'stop' ? '暂停爬取种子' : '恢复爬取种子')}？</span>}
           </a-spin>
         </a-modal>
       </div>

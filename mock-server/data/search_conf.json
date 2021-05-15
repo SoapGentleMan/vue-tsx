@@ -45,5 +45,10 @@
     "rel",
     "download",
     "new"
+  ],
+  "search_direction": [
+    "方向1",
+    "方向2",
+    "方向3"
   ]
 }

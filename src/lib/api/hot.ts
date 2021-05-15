@@ -7,26 +7,23 @@ class Hot {
   }
 
   createHot(options) {
-    const {text, start_date, end_date} = options
     return fetchTimeout(`${SERVER}/admin/save_hotword`, {
       method: 'POST',
-      body: {text, start_date, end_date}
+      body: options
     })
   }
 
   updateHot(options) {
-    const {id, text, start_date, end_date} = options
     return fetchTimeout(`${SERVER}/admin/save_hotword`, {
       method: 'POST',
-      body: {id, text, start_date, end_date}
+      body: options
     })
   }
 
   deleteHot(options) {
-    const {id} = options
     return fetchTimeout(`${SERVER}/admin/del_hotword`, {
       method: 'POST',
-      body: {id}
+      body: options
     })
   }
 }

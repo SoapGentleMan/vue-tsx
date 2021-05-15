@@ -7,26 +7,23 @@ class Relate {
   }
 
   createRelate(options) {
-    const {text, search_word, rel_level} = options
     return fetchTimeout(`${SERVER}/admin/save_relword`, {
       method: 'POST',
-      body: {text, search_word, rel_level}
+      body: options
     })
   }
 
   updateRelate(options) {
-    const {id, text, search_word, rel_level} = options
     return fetchTimeout(`${SERVER}/admin/save_relword`, {
       method: 'POST',
-      body: {id, text, search_word, rel_level}
+      body: options
     })
   }
 
   deleteRelate(options) {
-    const {id} = options
     return fetchTimeout(`${SERVER}/admin/del_relword`, {
       method: 'POST',
-      body: {id}
+      body: options
     })
   }
 }

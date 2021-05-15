@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Component from 'vue-class-component'
 import './components'
 import LoginModal from '../../components/login-modal/index.tsx.vue'
+import ResetPswdModal from '../../components/reset-pswd-modal/index.tsx.vue'
 import search from '../../lib/api/search'
 import account from '../../lib/api/account'
 
@@ -27,6 +28,7 @@ export default class Result extends Vue {
   username: string = '';
   userRole: string = '';
   showLoginModal: boolean = false;
+  showResetPswdModal: boolean = false;
 
   created() {
     const query = this.getUrlQuery(location.href) as {[key: string]: string};
@@ -81,11 +83,12 @@ export default class Result extends Vue {
 
   getSearchConf() {
     let cache;
-    const lsData = localStorage.getItem('searchConf')
+    let timestamp;
+    const lsData = localStorage.getItem('searchConf');
     if (!!lsData) {
       try {
         const json = JSON.parse(lsData);
-        (new Date().getTime() - json.timestamp < 1000 * 3600 * 6) && (cache = json.data)
+        (new Date().getTime() - json.timestamp < 1000 * 3600 * 6) && (cache = json.data) && (timestamp = json.timestamp)
       } catch (e) {
         // do nothing
       }
@@ -97,6 +100,7 @@ export default class Result extends Vue {
           const countryArr = [{key: '全部', value: ''}];
           const typeArr = [{key: '全部', value: ''}];
           const timeArr = [{key: '全部', value: ''}];
+          const directionArr = [{key: '全部', value: ''}];
           if (data.country_name && data.country_name.length > 0 && data.country_code && data.country_code.length > 0) {
             countryArr.push(...data.country_name.map((item, index) => {
               return {
@@ -122,10 +126,19 @@ export default class Result extends Vue {
               }
             }))
           }
+          if (data.search_direction && data.search_direction.length > 0) {
+            directionArr.push(...data.search_direction.map((item, index) => {
+              return {
+                key: item,
+                value: item
+              }
+            }))
+          }
           this.filterData = [
             {title: '国家', values: countryArr},
             {title: '格式', values: typeArr},
-            {title: '时间', values: timeArr}
+            {title: '时间', values: timeArr},
+            {title: '方向', values: directionArr}
           ];
           this.filterData.forEach((item, index) => {
             const filter = this.filterValue[index];
@@ -140,7 +153,7 @@ export default class Result extends Vue {
             });
             this.sortValue = this.sortData.findIndex(i => i.value === this.sortValue) > -1 ? this.sortValue : this.sortData[0].value
           }
-          localStorage.setItem('searchConf', JSON.stringify({data, timestamp: new Date().getTime()}))
+          localStorage.setItem('searchConf', JSON.stringify({data, timestamp: timestamp || new Date().getTime()}))
         } else {
           throw new Error(data.message)
         }
@@ -163,6 +176,7 @@ export default class Result extends Vue {
       country_code: this.filterValue[0],
       type_code: this.filterValue[1],
       time_code: this.filterValue[2],
+      search_direction: this.filterValue[3],
       sort_type: this.sortValue,
       page: this.pn,
       size: this.ps,
@@ -267,13 +281,24 @@ export default class Result extends Vue {
           </div>
 
           {this.isLogin && <div class={this.$style.userBlock}>
-            <span class={[this.$style.username, this.userRole === 'ADMIN' ? this.$style.admin : '']}
-                  onClick={() => this.usernameClick()}>{this.username}</span>
+            <a-dropdown>
+              <span class={[this.$style.username, this.userRole === 'ADMIN' ? this.$style.admin : '']}
+                    onClick={() => this.usernameClick()}>{this.username}</span>
+              <a-menu slot={'overlay'}>
+                <a-menu-item>
+                  <a onClick={() => this.showResetPswdModal = true}>修改密码</a>
+                </a-menu-item>
+              </a-menu>
+            </a-dropdown>
             <a-button type={'primary'} class={this.$style.loginBtn} onClick={() => this.toggleLogin()}>登出</a-button>
           </div>}
 
-          {this.showLoginModal && <div class={this.$style.loginBg}>
-            <LoginModal class={this.$style.login} onLogin={() => this.doAfterLogin()} onClose={() => this.showLoginModal = false}/>
+          {this.showLoginModal && <div class={this.$style.popupBg}>
+            <LoginModal class={this.$style.popup} onLogin={() => this.doAfterLogin()} onClose={() => this.showLoginModal = false}/>
+          </div>}
+
+          {this.showResetPswdModal && <div class={this.$style.popupBg}>
+            <ResetPswdModal class={this.$style.popup} onClose={() => this.showResetPswdModal = false}/>
           </div>}
         </a-layout-header>
 
@@ -321,7 +346,7 @@ export default class Result extends Vue {
               }
             </div>}
 
-            {this.resultList.length === 0 && <div class={this.$style.noDataBlock}>{this.resultLoading ? '查询中...' : '未查询到相关数据'}</div>}
+            {this.resultList.length === 0 && <div class={this.$style.noDataBlock}>{this.confLoading || this.resultLoading ? '查询中...' : '未查询到相关数据'}</div>}
 
             {this.resultList.length > 0 && <div class={this.$style.resultList}>
               {

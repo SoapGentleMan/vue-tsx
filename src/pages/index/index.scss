@@ -1,16 +1,17 @@
 .layout {
   min-height: 100vh !important;
-  background-color: #fff;
+  background: url(../../images/bg.jpg);
+  background-size: cover;
 
   :global(.ant-layout-header) {
-    background-color: #fff;
+    background-color: transparent;
     display: flex;
     justify-content: flex-end;
     align-items: center;
   }
 
   :global(.ant-layout-footer) {
-    background-color: #fbfbfb;
+    background-color: transparent;
     display: flex;
     justify-content: flex-end;
   }
@@ -20,6 +21,7 @@
   font-size: 13px;
   color: #222;
   margin-right: 8px;
+  line-height: 20px;
 
   &.admin {
     cursor: pointer;
@@ -42,7 +44,7 @@
   border-radius: 6px;
 }
 
-.loginBg {
+.popupBg {
   position: fixed;
   top: 0;
   left: 0;
@@ -50,7 +52,7 @@
   height: 100vh;
   background-color: rgba(0, 0, 0, 0.5);
 
-  .login {
+  .popup {
     position: absolute;
     top: 50%;
     left: 50%;

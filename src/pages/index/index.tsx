@@ -1,9 +1,9 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import LoginModal from '../../components/login-modal/index.tsx.vue'
+import ResetPswdModal from '../../components/reset-pswd-modal/index.tsx.vue'
 import account from '../../lib/api/account'
 import search from '../../lib/api/search'
-import User from '../admin/user'
 
 @Component({})
 export default class Index extends Vue {
@@ -18,6 +18,7 @@ export default class Index extends Vue {
   username: string = '';
   userRole: string = '';
   showLoginModal: boolean = false;
+  showResetPswdModal: boolean = false;
 
   created() {
     this.isLogin = !!localStorage.getItem('authorization');
@@ -126,12 +127,23 @@ export default class Index extends Vue {
     return (
       <a-layout class={this.$style.layout}>
         <a-layout-header>
-          {this.isLogin && <span class={[this.$style.username, this.userRole === 'ADMIN' ? this.$style.admin : '']}
-                                 onClick={() => this.usernameClick()}>{this.username}</span>}
+          {this.isLogin && <a-dropdown>
+            <span class={[this.$style.username, this.userRole === 'ADMIN' ? this.$style.admin : '']}
+                  onClick={() => this.usernameClick()}>{this.username}</span>
+            <a-menu slot={'overlay'}>
+              <a-menu-item>
+                <a onClick={() => this.showResetPswdModal = true}>修改密码</a>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>}
           <a-button type={'primary'} class={this.$style.loginBtn} onClick={() => this.toggleLogin()}>{this.isLogin ? '登出' : '登录'}</a-button>
 
-          {this.showLoginModal && <div class={this.$style.loginBg}>
-            <LoginModal class={this.$style.login} onLogin={() => this.doAfterLogin()} onClose={() => this.showLoginModal = false}/>
+          {this.showLoginModal && <div class={this.$style.popupBg}>
+            <LoginModal class={this.$style.popup} onLogin={() => this.doAfterLogin()} onClose={() => this.showLoginModal = false}/>
+          </div>}
+
+          {this.showResetPswdModal && <div class={this.$style.popupBg}>
+            <ResetPswdModal class={this.$style.popup} onClose={() => this.showResetPswdModal = false}/>
           </div>}
         </a-layout-header>
 

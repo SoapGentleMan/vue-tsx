@@ -9,7 +9,11 @@
       "country_code": "cn",
       "created_date": "2020-03-01",
       "update_date": "2020-03-02",
-      "status": 0
+      "status": 0,
+      "search_direction": [
+        "方向1",
+        "方向2"
+      ]
     },
     {
       "id": 222,
@@ -18,7 +22,11 @@
       "country_code": "th",
       "created_date": "2020-03-01",
       "update_date": "2020-03-02",
-      "status": 1
+      "status": 1,
+      "search_direction": [
+        "方向2",
+        "方向3"
+      ]
     },
     {
       "id": 333,
@@ -27,7 +35,11 @@
       "country_code": "vnm",
       "created_date": "2020-03-01",
       "update_date": "2020-03-02",
-      "status": 2
+      "status": 2,
+      "search_direction": [
+        "方向1",
+        "方向3"
+      ]
     }
   ],
   "pages": 2

@@ -7,26 +7,23 @@ class Seed {
   }
 
   createSeed(options) {
-    const {url, country_code} = options
     return fetchTimeout(`${SERVER}/admin/add_seed`, {
       method: 'POST',
-      body: {url, country_code}
+      body: options
     })
   }
 
   setSeedStatus(options) {
-    const {id, act} = options
     return fetchTimeout(`${SERVER}/admin/set_seed_status`, {
       method: 'POST',
-      body: {id, act}
+      body: options
     })
   }
 
   deleteSeed(options) {
-    const {id} = options
     return fetchTimeout(`${SERVER}/admin/del_seed`, {
       method: 'POST',
-      body: {id}
+      body: options
     })
   }
 }

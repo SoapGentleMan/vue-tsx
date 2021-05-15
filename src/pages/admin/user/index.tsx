@@ -4,6 +4,7 @@ import './components'
 import { message } from 'ant-design-vue'
 import moment from 'moment'
 import user from '../../../lib/api/user'
+import searchAdmin from '../../../lib/api/search-admin';
 
 @Component({})
 export default class User extends Vue {
@@ -14,6 +15,8 @@ export default class User extends Vue {
   ps: number = 10;
   totalPage: number = 0;
 
+  directionList = [];
+
   confirmLoading: boolean = false;
   showConfirm: boolean = false;
   confirmType: string = '';
@@ -21,13 +24,15 @@ export default class User extends Vue {
     username: '',
     password: '',
     expire_date: '',
-    level: undefined
+    level: undefined,
+    search_direction: []
   };
   expireCount: number = 0;
   searchValue: string = '';
   searchShowValue: string = '';
 
   created() {
+    this.getDirectionData();
     this.getUserList()
   }
 
@@ -42,6 +47,14 @@ export default class User extends Vue {
         dataIndex: 'level',
         customRender: text => {
           return text === 2 ? 'vip用户' : (text === 1 ? '普通用户' : '测试用户')
+        }
+      },
+      {
+        title: '搜索方向',
+        dataIndex: 'search_direction',
+        ellipsis: true,
+        customRender: data => {
+          return data.length === 0 ? '无' : data.join('、')
         }
       },
       {
@@ -66,6 +79,34 @@ export default class User extends Vue {
         }
       },
     ]
+  }
+
+  getDirectionData() {
+    let cache;
+    let timestamp;
+    const lsData = localStorage.getItem('directionList')
+    if (!!lsData) {
+      try {
+        const json = JSON.parse(lsData);
+        (new Date().getTime() - json.timestamp < 1000 * 3600 * 6) && (cache = json.data) && (timestamp = json.timestamp)
+      } catch (e) {
+        // do nothing
+      }
+    }
+    return Promise.resolve(cache || searchAdmin.getSearchDirection())
+      .then(data => {
+        if (data.success === true && data.data && data.data.length > 0) {
+          this.directionList = data.data.map((item, index) => {
+            return {
+              key: item,
+              value: item
+            }
+          })
+          localStorage.setItem('directionList', JSON.stringify({data, timestamp: timestamp || new Date().getTime()}))
+        } else {
+          throw new Error(data.message)
+        }
+      })
   }
 
   getUserList() {
@@ -141,12 +182,14 @@ export default class User extends Vue {
         username: '',
         password: '',
         expire_date: '',
-        level: undefined
+        level: undefined,
+        search_direction: []
       } : {
         username: data.username,
         password: '',
         expire_date: data.expire_date,
-        level: data.level
+        level: data.level,
+        search_direction: data.search_direction
       }
     }
   }
@@ -175,6 +218,9 @@ export default class User extends Vue {
     if (!this.confirmObj.expire_date && this.confirmType === 'edit') {
       return message.error('请选择到期日期', 1.5)
     }
+    if (this.confirmObj.search_direction.length === 0 && ['create', 'edit'].indexOf(this.confirmType) > -1) {
+      return message.error('请选择搜索方向', 1.5)
+    }
     if (this.confirmLoading) {
       return
     }
@@ -187,7 +233,8 @@ export default class User extends Vue {
         options = {
           username: this.confirmObj.username,
           password: this.confirmObj.password,
-          level: this.confirmObj.level
+          level: this.confirmObj.level,
+          search_direction: this.confirmObj.search_direction
         }
         break
       }
@@ -196,7 +243,8 @@ export default class User extends Vue {
         options = {
           username: this.confirmObj.username,
           level: this.confirmObj.level,
-          expire_date: this.confirmObj.expire_date
+          expire_date: this.confirmObj.expire_date,
+          search_direction: this.confirmObj.search_direction
         }
         break
       }
@@ -314,6 +362,16 @@ export default class User extends Vue {
             {['create', 'reset'].indexOf(this.confirmType) > -1 && <div class={this.$style.formItem}>
               <a-input value={this.confirmObj.password} onChange={e => this.setConfirmObj('password', e.target.value)}
                        placeholder={this.confirmType === 'create' ? '初始密码' : '新的密码'}/>
+            </div>}
+
+            {['create', 'edit'].indexOf(this.confirmType) > -1 && <div class={this.$style.formItem}>
+              <a-select mode={'multiple'} value={this.confirmObj.search_direction}
+                        onChange={value => this.setConfirmObj('search_direction', value)}
+                        placeholder={'搜索方向'}>
+                {
+                  this.directionList.map(item => <a-select-option value={item.value}>{item.key}</a-select-option>)
+                }
+              </a-select>
             </div>}
 
             {this.confirmType === 'delete' && <span class={this.$style.warnColor}>确定注销用户？</span>}
