@@ -20,6 +20,13 @@ class Seed {
     })
   }
 
+  updateSeed(options) {
+    return fetchTimeout(`${SERVER}/admin/update_seed`, {
+      method: 'POST',
+      body: options
+    })
+  }
+
   deleteSeed(options) {
     return fetchTimeout(`${SERVER}/admin/del_seed`, {
       method: 'POST',

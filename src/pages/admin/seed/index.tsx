@@ -77,6 +77,8 @@ export default class Torrent extends Vue {
           return <span>
             <a onClick={() => this.toggleConfirm(data.status === 1 ? 'stop' : 'restore', data)}>{data.status === 1 ? '停止' : '开始'}</a>
             <a-divider type={'vertical'}/>
+            <a onClick={() => this.toggleConfirm('edit', data)}>编辑</a>
+            <a-divider type={'vertical'}/>
             <a onClick={() => this.toggleConfirm('delete', data)}>删除</a>
           </span>
         }
@@ -198,6 +200,12 @@ export default class Torrent extends Vue {
           okText: '确定'
         }
       }
+      case 'edit': {
+        return {
+          title: '编辑种子链接',
+          okText: '保存'
+        }
+      }
       case 'delete': {
         return {
           title: '删除种子链接',
@@ -236,13 +244,13 @@ export default class Torrent extends Vue {
 
   doAction() {
     console.log(this.confirmObj);
-    if (!this.confirmObj.url && this.confirmType === 'create') {
+    if (!this.confirmObj.url && ['create', 'edit'].indexOf(this.confirmType) > -1) {
       return message.error('请输入种子链接', 1.5)
     }
-    if (!this.confirmObj.country_code && this.confirmType === 'create') {
+    if (!this.confirmObj.country_code && ['create', 'edit'].indexOf(this.confirmType) > -1) {
       return message.error('请选择国家', 1.5)
     }
-    if (this.confirmObj.search_direction.length === 0 && this.confirmType === 'create') {
+    if (this.confirmObj.search_direction.length === 0 && ['create', 'edit'].indexOf(this.confirmType) > -1) {
       return message.error('请选择搜索方向', 1.5)
     }
     if (this.confirmLoading) {
@@ -267,6 +275,15 @@ export default class Torrent extends Vue {
         options = {
           id: this.confirmObj.id,
           act: this.confirmObj.act
+        }
+        break
+      }
+      case 'edit': {
+        fetchPromise = seed.createSeed;
+        options = {
+          id: this.confirmObj.id,
+          country_code: this.confirmObj.country_code,
+          search_direction: this.confirmObj.search_direction
         }
         break
       }
@@ -334,12 +351,12 @@ export default class Torrent extends Vue {
                  cancelText={'取消'} onCancel={() => this.toggleConfirm('')}
                  confirmLoading={false} destroyOnClose={true}>
           <a-spin spinning={this.confirmLoading}>
-            {this.confirmType === 'create' && <div class={this.$style.formItem}>
+            {['create', 'edit'].indexOf(this.confirmType) > -1 && <div class={this.$style.formItem}>
               <a-input value={this.confirmObj.url} onChange={e => this.setConfirmObj('url', e.target.value)}
-                       placeholder={'种子URL'}/>
+                       placeholder={'种子URL'} disabled={this.confirmType !== 'create'}/>
             </div>}
 
-            {this.confirmType === 'create' && <div class={this.$style.formItem}>
+            {['create', 'edit'].indexOf(this.confirmType) > -1 && <div class={this.$style.formItem}>
               <a-select value={this.confirmObj.country_code} onChange={value => this.setConfirmObj('country_code', value)}
                         placeholder={'国家'}>
                 {
@@ -348,7 +365,7 @@ export default class Torrent extends Vue {
               </a-select>
             </div>}
 
-            {this.confirmType === 'create' && <div class={this.$style.formItem}>
+            {['create', 'edit'].indexOf(this.confirmType) > -1 && <div class={this.$style.formItem}>
               <a-select mode={'multiple'} value={this.confirmObj.search_direction}
                         onChange={value => this.setConfirmObj('search_direction', value)}
                         placeholder={'搜索方向'}>
@@ -358,7 +375,8 @@ export default class Torrent extends Vue {
               </a-select>
             </div>}
 
-            {this.confirmType !== 'create' && <span class={this.$style.warnColor}>确定{this.confirmType === 'delete' ? '删除种子链接' : (this.confirmType === 'stop' ? '暂停爬取种子' : '恢复爬取种子')}？</span>}
+            {['create', 'edit'].indexOf(this.confirmType) === -1 &&
+            <span class={this.$style.warnColor}>确定{this.confirmType === 'delete' ? '删除种子链接' : (this.confirmType === 'stop' ? '暂停爬取种子' : '恢复爬取种子')}？</span>}
           </a-spin>
         </a-modal>
       </div>
