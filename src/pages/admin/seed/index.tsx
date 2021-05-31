@@ -31,10 +31,19 @@ export default class Torrent extends Vue {
   searchValue: string = '';
   searchShowValue: string = '';
 
+  timeout = null;   // 定时更新结果
+
   created() {
     this.getCountryData();
-    this.getDirectionData();
-    this.getSeedList()
+    this.getDirectionData()
+  }
+
+  activated() {
+    this.changePage(this.pn)
+  }
+
+  deactivated() {
+    this.timeout && clearTimeout(this.timeout)
   }
 
   columns(h) {
@@ -71,6 +80,15 @@ export default class Torrent extends Vue {
         }
       },
       {
+        title: 'URL',
+        dataIndex: 'scrap_url',
+        ellipsis: true
+      },
+      {
+        title: '收录数',
+        dataIndex: 'scrap_total'
+      },
+      {
         title: '操作',
         key: 'operate',
         customRender: data => {
@@ -87,27 +105,15 @@ export default class Torrent extends Vue {
   }
 
   getDirectionData() {
-    let cache;
-    let timestamp;
-    const lsData = localStorage.getItem('directionList')
-    if (!!lsData) {
-      try {
-        const json = JSON.parse(lsData);
-        (new Date().getTime() - json.timestamp < 1000 * 3600 * 6) && (cache = json.data) && (timestamp = json.timestamp)
-      } catch (e) {
-        // do nothing
-      }
-    }
-    return Promise.resolve(cache || searchAdmin.getSearchDirection())
+    return searchAdmin.getSearchDirection()
       .then(data => {
         if (data.success === true && data.data && data.data.length > 0) {
-          this.directionList = data.data.map((item, index) => {
+          this.directionList = data.data.map(item => {
             return {
               key: item,
               value: item
             }
           })
-          localStorage.setItem('directionList', JSON.stringify({data, timestamp: timestamp || new Date().getTime()}))
         } else {
           throw new Error(data.message)
         }
@@ -115,18 +121,7 @@ export default class Torrent extends Vue {
   }
 
   getCountryData() {
-    let cache;
-    let timestamp;
-    const lsData = localStorage.getItem('countryList')
-    if (!!lsData) {
-      try {
-        const json = JSON.parse(lsData);
-        (new Date().getTime() - json.timestamp < 1000 * 3600 * 6) && (cache = json.data) && (timestamp = json.timestamp)
-      } catch (e) {
-        // do nothing
-      }
-    }
-    return Promise.resolve(cache || search.getSearchConf())
+    return search.getSearchConf()
       .then(data => {
         if (data.success === true && data.country_name && data.country_name.length > 0 && data.country_code && data.country_code.length > 0) {
           this.countryList = data.country_name.map((item, index) => {
@@ -135,7 +130,6 @@ export default class Torrent extends Vue {
               value: data.country_code[index] || ''
             }
           })
-          localStorage.setItem('countryList', JSON.stringify({data, timestamp: timestamp || new Date().getTime()}))
         } else {
           throw new Error(data.message)
         }
@@ -167,7 +161,10 @@ export default class Torrent extends Vue {
       }
       this.data = [];
       message.error(e.message, 1.5)
-    }).finally(() => this.loading = false)
+    }).finally(() => {
+      this.loading = false;
+      this.timeout = setTimeout(() => this.getSeedList(), 10000)
+    })
   }
 
   doNoLoginAction() {
@@ -176,6 +173,7 @@ export default class Torrent extends Vue {
   }
 
   changePage(pn) {
+    this.timeout && clearTimeout(this.timeout);
     this.pn = pn;
     this.getSeedList()
   }
@@ -190,13 +188,13 @@ export default class Torrent extends Vue {
       }
       case 'stop': {
         return {
-          title: '暂停爬取种子',
+          title: '停止爬取种子',
           okText: '确定'
         }
       }
       case 'restore': {
         return {
-          title: '恢复爬取种子',
+          title: '开始爬取种子',
           okText: '确定'
         }
       }
@@ -309,6 +307,9 @@ export default class Torrent extends Vue {
           }
           this.toggleConfirm('');
         } else {
+          if (['stop', 'restore'].indexOf(this.confirmType) > -1) {
+            this.toggleConfirm('')
+          }
           throw new Error(data.message)
         }
       }).catch(e => {
@@ -334,7 +335,10 @@ export default class Torrent extends Vue {
                    onPressEnter={e => this.search(e.target.value)}
                    onChange={e => this.searchShowValue = e.target.value}/>
 
-          <a-button type={'primary'} onClick={() => this.toggleConfirm('create')}>添加种子链接</a-button>
+          <div>
+            <a-button type={'primary'} onClick={() => this.toggleConfirm('create')}>添加种子链接</a-button>
+            <a-button style={{marginLeft: '8px'}} onClick={() => this.changePage(this.pn)}>刷新</a-button>
+          </div>
         </div>
 
         <a-table columns={this.columns(h)} dataSource={this.data}
@@ -376,7 +380,7 @@ export default class Torrent extends Vue {
             </div>}
 
             {['create', 'edit'].indexOf(this.confirmType) === -1 &&
-            <span class={this.$style.warnColor}>确定{this.confirmType === 'delete' ? '删除种子链接' : (this.confirmType === 'stop' ? '暂停爬取种子' : '恢复爬取种子')}？</span>}
+            <span class={this.$style.warnColor}>确定{this.confirmType === 'delete' ? '删除种子链接' : (this.confirmType === 'stop' ? '停止爬取种子' : '开始爬取种子')}？</span>}
           </a-spin>
         </a-modal>
       </div>

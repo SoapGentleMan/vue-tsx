@@ -5,6 +5,7 @@ import LoginModal from '../../components/login-modal/index.tsx.vue'
 import ResetPswdModal from '../../components/reset-pswd-modal/index.tsx.vue'
 import search from '../../lib/api/search'
 import account from '../../lib/api/account'
+import { message } from 'ant-design-vue'
 
 @Component({})
 export default class Result extends Vue {
@@ -30,11 +31,18 @@ export default class Result extends Vue {
   showLoginModal: boolean = false;
   showResetPswdModal: boolean = false;
 
+  showEdit: boolean = false;
+  editLoading: boolean = false;
+  editObj = {
+    id: '',
+    file_name: '',
+  };
+
   created() {
     const query = this.getUrlQuery(location.href) as {[key: string]: string};
     this.searchValue = query.s as string || '';
     this.sortValue = query.o as string || '';
-    this.filterValue = (query.f  as string || ',,').split(',');
+    this.filterValue = (query.f  as string || ',,,,').split(',');
     this.pn = +query.pn || 1;
 
     this.isLogin = !!localStorage.getItem('authorization');
@@ -82,25 +90,19 @@ export default class Result extends Vue {
   }
 
   getSearchConf() {
-    let cache;
-    let timestamp;
-    const lsData = localStorage.getItem('searchConf');
-    if (!!lsData) {
-      try {
-        const json = JSON.parse(lsData);
-        (new Date().getTime() - json.timestamp < 1000 * 3600 * 6) && (cache = json.data) && (timestamp = json.timestamp)
-      } catch (e) {
-        // do nothing
-      }
-    }
     this.confLoading = true;
-    return Promise.resolve(cache || search.getSearchConf())
+    return search.getSearchConf()
       .then(data => {
         if (data.success === true) {
           const countryArr = [{key: '全部', value: ''}];
           const typeArr = [{key: '全部', value: ''}];
           const timeArr = [{key: '全部', value: ''}];
           const directionArr = [{key: '全部', value: ''}];
+          const optionArr = [
+            {key: '默认', value: 0},
+            {key: '完全查找', value: 1},
+            {key: '分词查找', value: 2}
+          ]
           if (data.country_name && data.country_name.length > 0 && data.country_code && data.country_code.length > 0) {
             countryArr.push(...data.country_name.map((item, index) => {
               return {
@@ -138,11 +140,16 @@ export default class Result extends Vue {
             {title: '国家', values: countryArr},
             {title: '格式', values: typeArr},
             {title: '时间', values: timeArr},
-            {title: '方向', values: directionArr}
+            {title: '方向', values: directionArr},
+            {title: '选项', values: optionArr}
           ];
           this.filterData.forEach((item, index) => {
             const filter = this.filterValue[index];
-            this.$set(this.filterValue, index, item.values.findIndex(i => i.value === filter) > -1 ? filter : '')
+            this.$set(
+              this.filterValue, index,
+              item.values.findIndex(i => i.value === (item.title === '选项' ? +filter : filter)) > -1
+                ? (item.title === '选项' ? +filter : filter) : (item.title === '选项' ? 0 : '')
+            )
           })
           if (data.sort_name && data.sort_name.length > 0 && data.sort_type && data.sort_type.length > 0) {
             this.sortData = data.sort_name.map((item, index) => {
@@ -153,7 +160,6 @@ export default class Result extends Vue {
             });
             this.sortValue = this.sortData.findIndex(i => i.value === this.sortValue) > -1 ? this.sortValue : this.sortData[0].value
           }
-          localStorage.setItem('searchConf', JSON.stringify({data, timestamp: timestamp || new Date().getTime()}))
         } else {
           throw new Error(data.message)
         }
@@ -177,6 +183,7 @@ export default class Result extends Vue {
       type_code: this.filterValue[1],
       time_code: this.filterValue[2],
       search_direction: this.filterValue[3],
+      keyword_type: +this.filterValue[4],
       sort_type: this.sortValue,
       page: this.pn,
       size: this.ps,
@@ -268,6 +275,45 @@ export default class Result extends Vue {
     if (this.userRole === 'ADMIN') {
       window.open(`${CLIENT}/admin`, '_blank')
     }
+  }
+
+  toggleEdit(doc?) {
+    this.showEdit = !!doc;
+    if (!!doc) {
+      this.editObj = {
+        id: doc.id,
+        file_name: doc.file_name
+      }
+    }
+  }
+
+  doAction() {
+    console.log(this.editObj);
+    if (!this.editObj.file_name) {
+      return message.error('请输入文档标题', 1.5)
+    }
+    if (this.editLoading) {
+      return
+    }
+    this.editLoading = true;
+    return search.editDoc(this.editObj)
+      .then(data => {
+        if (data.success === true) {
+          this.resultList = [];
+          this.relWords = [];
+          this.totalPage = 0;
+          this.getSearchResult();
+          this.toggleEdit()
+        } else {
+          throw new Error(data.message)
+        }
+      }).catch(e => {
+        if (e.message === '未登录') {
+          localStorage.removeItem('authorization');
+          this.isLogin = false
+        }
+        message.error(e.message, 1.5)
+      }).finally(() => this.editLoading = false)
   }
 
   render(h) {
@@ -362,7 +408,8 @@ export default class Result extends Vue {
                         {item.file_time}
                         <i class={this.$style.divider}>|</i>
                         {item.download_times + '次下载'}
-                        {item.type_code !== 'html' && <a class={this.$style.btn} href={item.download_url} target={'_blank'}>马上下载</a>}
+                        {item.type_code !== 'html' && this.userRole === 'ADMIN' && <a class={this.$style.btn} onClick={() => this.toggleEdit(item)}>编辑</a>}
+                        {item.type_code !== 'html' && <a class={[this.$style.btn, this.$style.right]} href={item.download_url} target={'_blank'}>马上下载</a>}
                       </div>
                     </div>
                   )
@@ -389,6 +436,18 @@ export default class Result extends Vue {
                                                  onChange={page => this.changePage(page)}/>}
           </div>
         </a-layout-content>
+
+        <a-modal visible={this.showEdit} title={'编辑'} maskClosable={false}
+                 okText={'确定'} onOk={() => this.doAction()}
+                 cancelText={'取消'} onCancel={() => this.toggleEdit()}
+                 confirmLoading={false} destroyOnClose={true}>
+          <a-spin spinning={this.editLoading}>
+            <div class={this.$style.formItem}>
+              <a-input value={this.editObj.file_name} onChange={e => this.editObj.file_name = e.target.value}
+                       placeholder={'种子URL'}/>
+            </div>
+          </a-spin>
+        </a-modal>
       </a-layout>
     )
   }

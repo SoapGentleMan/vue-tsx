@@ -250,17 +250,22 @@
     margin: 0 4px;
     position: relative;
     top: -1px;
+    font-style: normal;
   }
 
   .btn {
     color: #fff;
-    float: right;
     font-size: 14px;
     height: 26px;
     line-height: 26px;
     padding: 0 16px;
     border-radius: 2px;
     background-color: rgb(47, 173, 133);
+    margin-left: 8px;
+
+    &.right {
+      float: right;
+    }
 
     &:hover {
       background-color: #3fba93;
@@ -298,4 +303,8 @@
       }
     }
   }
+}
+
+.formItem {
+  margin-bottom: 16px;
 }

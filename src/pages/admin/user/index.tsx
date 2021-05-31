@@ -82,18 +82,7 @@ export default class User extends Vue {
   }
 
   getDirectionData() {
-    let cache;
-    let timestamp;
-    const lsData = localStorage.getItem('directionList')
-    if (!!lsData) {
-      try {
-        const json = JSON.parse(lsData);
-        (new Date().getTime() - json.timestamp < 1000 * 3600 * 6) && (cache = json.data) && (timestamp = json.timestamp)
-      } catch (e) {
-        // do nothing
-      }
-    }
-    return Promise.resolve(cache || searchAdmin.getSearchDirection())
+    return searchAdmin.getSearchDirection()
       .then(data => {
         if (data.success === true && data.data && data.data.length > 0) {
           this.directionList = data.data.map((item, index) => {
@@ -102,7 +91,6 @@ export default class User extends Vue {
               value: item
             }
           })
-          localStorage.setItem('directionList', JSON.stringify({data, timestamp: timestamp || new Date().getTime()}))
         } else {
           throw new Error(data.message)
         }

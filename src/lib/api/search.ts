@@ -16,6 +16,13 @@ class Search {
       body: options
     })
   }
+
+  editDoc(options) {
+    return fetchTimeout(`${SERVER}/admin/updateDoc`, {
+      method: 'POST',
+      body: options
+    })
+  }
 }
 
 export default new Search()

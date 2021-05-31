@@ -10,6 +10,8 @@
       "created_date": "2020-03-01",
       "update_date": "2020-03-02",
       "status": 0,
+      "scrap_url": "https://www.baidu.com",
+      "scrap_total": 100,
       "search_direction": [
         "方向1",
         "方向2"
@@ -23,6 +25,8 @@
       "created_date": "2020-03-01",
       "update_date": "2020-03-02",
       "status": 1,
+      "scrap_url": "https://www1.baidu.com",
+      "scrap_total": 150,
       "search_direction": [
         "方向2",
         "方向3"
@@ -36,6 +40,8 @@
       "created_date": "2020-03-01",
       "update_date": "2020-03-02",
       "status": 2,
+      "scrap_url": "https://www2.baidu.com",
+      "scrap_total": 200,
       "search_direction": [
         "方向1",
         "方向3"
