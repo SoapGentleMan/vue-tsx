@@ -288,7 +288,6 @@ export default class Result extends Vue {
   }
 
   doAction() {
-    console.log(this.editObj);
     if (!this.editObj.file_name) {
       return message.error('请输入文档标题', 1.5)
     }
@@ -444,7 +443,7 @@ export default class Result extends Vue {
           <a-spin spinning={this.editLoading}>
             <div class={this.$style.formItem}>
               <a-input value={this.editObj.file_name} onChange={e => this.editObj.file_name = e.target.value}
-                       placeholder={'种子URL'}/>
+                       placeholder={''}/>
             </div>
           </a-spin>
         </a-modal>

@@ -124,7 +124,6 @@ export default class Conf extends Vue {
   }
 
   doAction() {
-    console.log(this.confirmObj);
     if (!this.confirmObj.name) {
       return message.error('请输入参数名', 1.5)
     }

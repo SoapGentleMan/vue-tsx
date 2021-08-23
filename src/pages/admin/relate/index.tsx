@@ -151,7 +151,6 @@ export default class Word extends Vue {
   }
 
   doAction() {
-    console.log(this.confirmObj);
     if (!this.confirmObj.text && this.confirmType !== 'delete') {
       return message.error('请输入关联词', 1.5)
     }

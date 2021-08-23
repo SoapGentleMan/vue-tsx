@@ -193,7 +193,6 @@ export default class User extends Vue {
   }
 
   doAction() {
-    console.log(this.confirmObj);
     if (!this.confirmObj.username && ['create', 'edit', 'reset'].indexOf(this.confirmType) > -1) {
       return message.error('请输入用户名', 1.5)
     }

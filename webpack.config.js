@@ -31,7 +31,7 @@ module.exports = function makeWebpackConfig() {
 
   config.output = {
     path: path.join(__dirname, './dist'),
-    publicPath: isProd ? 'http://changjing-data.com/' : '/',
+    publicPath: isProd ? 'http://ynshowway.cn/' : '/',
     filename: isProd ? 'js/[name].[hash].js' : '[name].bundle.js',
     chunkFilename: isProd ? 'js/[name].[hash].js' : '[name].bundle.js'
   };
@@ -185,7 +185,7 @@ module.exports = function makeWebpackConfig() {
 
     new webpack.DefinePlugin({
       CLIENT: JSON.stringify(isProd ? '.' : ''),
-      SERVER: JSON.stringify(isProd ? 'http://service.changjing-data.com:8081' : 'http://localhost:8081'),
+      SERVER: JSON.stringify(isProd ? 'http://ynshowway.cn:8081' : 'http://localhost:8081'),
       isProd: JSON.stringify(isProd),
       isRelease: JSON.stringify(isRelease)
     }),

@@ -241,7 +241,6 @@ export default class Torrent extends Vue {
   }
 
   doAction() {
-    console.log(this.confirmObj);
     if (!this.confirmObj.url && ['create', 'edit'].indexOf(this.confirmType) > -1) {
       return message.error('请输入种子链接', 1.5)
     }

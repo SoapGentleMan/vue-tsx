@@ -151,7 +151,6 @@ export default class Hot extends Vue {
   }
 
   doAction() {
-    console.log(this.confirmObj);
     if (!this.confirmObj.text && this.confirmType !== 'delete') {
       return message.error('请输入热点词', 1.5)
     }
