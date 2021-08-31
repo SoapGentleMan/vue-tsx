@@ -15,6 +15,12 @@
     padding-top: 94px;
   }
 
+  :global(.ant-layout-footer) {
+    display: flex;
+    justify-content: center;
+    padding: 0;
+  }
+
   :global(.ant-pagination) {
     margin-top: 27px;
   }
@@ -303,6 +309,10 @@
       }
     }
   }
+}
+
+.layer {
+  color: #bbb;
 }
 
 .formItem {

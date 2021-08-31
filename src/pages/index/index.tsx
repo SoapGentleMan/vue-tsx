@@ -149,7 +149,7 @@ export default class Index extends Vue {
 
         <a-layout-content>
           <div class={this.$style.content}>
-            <img class={this.$style.logo} src={require('../../images/logo.jpg')}/>
+            <img class={this.$style.logo} src={require('../../images/logo.png')}/>
 
             <div class={this.$style.inputBlock}>
               <input ref={'input'} class={this.$style.input} maxlength={255}/>
@@ -185,9 +185,7 @@ export default class Index extends Vue {
         </a-layout-content>
 
         <a-layout-footer>
-          <span class={this.$style.layer}>3213123123123</span>
-          <span class={this.$style.layer}>3213123123123</span>
-          <span class={this.$style.layer}>3213123123123</span>
+          <span class={this.$style.layer}>滇ICP备2021006064号</span>
         </a-layout-footer>
       </a-layout>
     )

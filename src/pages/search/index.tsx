@@ -319,7 +319,7 @@ export default class Result extends Vue {
     return (
       <a-layout class={this.$style.layout}>
         <a-layout-header>
-          <img class={this.$style.logo} src={require('../../images/logo.jpg')}/>
+          <img class={this.$style.logo} src={require('../../images/logo.png')}/>
           <div class={this.$style.inputBlock}>
             <input class={this.$style.input} value={this.searchValue} onChange={e => this.searchValue = e.target.value} maxlength={255}/>
             <span class={this.$style.btn} onClick={() => this.search()}>搜索一下</span>
@@ -435,6 +435,10 @@ export default class Result extends Vue {
                                                  onChange={page => this.changePage(page)}/>}
           </div>
         </a-layout-content>
+
+        <a-layout-footer>
+          <span class={this.$style.layer}>滇ICP备2021006064号</span>
+        </a-layout-footer>
 
         <a-modal visible={this.showEdit} title={'编辑'} maskClosable={false}
                  okText={'确定'} onOk={() => this.doAction()}
