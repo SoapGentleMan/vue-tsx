@@ -437,7 +437,7 @@ export default class Result extends Vue {
         </a-layout-content>
 
         <a-layout-footer>
-          <span class={this.$style.layer}>滇ICP备2021006064号</span>
+          <a href={'http://beian.miit.gov.cn/'} target={'_blank'} class={this.$style.layer}>滇ICP备2021006064号</a>
         </a-layout-footer>
 
         <a-modal visible={this.showEdit} title={'编辑'} maskClosable={false}
