@@ -172,7 +172,7 @@ export default class Hot extends Vue {
         options = {
           text: this.confirmObj.text,
           start_date: this.confirmObj.start_date,
-          end_date: +this.confirmObj.end_date
+          end_date: this.confirmObj.end_date
         }
         break
       }
@@ -182,7 +182,7 @@ export default class Hot extends Vue {
           id: this.confirmObj.id,
           text: this.confirmObj.text,
           start_date: this.confirmObj.start_date,
-          end_date: +this.confirmObj.end_date
+          end_date: this.confirmObj.end_date
         }
         break
       }
@@ -257,7 +257,7 @@ export default class Hot extends Vue {
 
             {this.confirmType !== 'delete' && <div class={this.$style.formItem}>
               <a-range-picker value={
-                                !!this.confirmObj.start_date && !!this.confirmObj.start_date ?
+                                !!this.confirmObj.start_date && !!this.confirmObj.end_date ?
                                   [moment(this.confirmObj.start_date), moment(this.confirmObj.end_date)] : []
                               }
                               allowClear={false}
