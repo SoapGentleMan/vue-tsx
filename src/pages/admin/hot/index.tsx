@@ -37,10 +37,6 @@ export default class Hot extends Vue {
         dataIndex: 'text',
       },
       {
-        title: '排序',
-        dataIndex: 'sort'
-      },
-      {
         title: '开始日期',
         dataIndex: 'start_date'
       },
@@ -59,10 +55,16 @@ export default class Hot extends Vue {
         title: '操作',
         key: 'operate',
         customRender: data => {
+          const notNeedUp = this.pn === 1 && data.index === 0;
+          const notNeedDown = this.pn === this.totalPage && data.index === this.data.length - 1;
           return <span>
             <a onClick={() => this.toggleConfirm('edit', data)}>编辑</a>
             <a-divider type={'vertical'}/>
             <a onClick={() => this.toggleConfirm('delete', data)}>删除</a>
+            <a-divider type={'vertical'}/>
+            {!notNeedUp && <a onClick={() => this.move('up', data)}>上移</a>}
+            {(!notNeedUp && !notNeedDown) && <a-divider type={'vertical'}/>}
+            {!notNeedDown && <a onClick={() => this.move('down', data)}>下移</a>}
           </span>
         }
       },
@@ -78,7 +80,10 @@ export default class Hot extends Vue {
       pn: this.pn, ps: this.ps, search: this.searchValue
     }).then(data => {
       if (data.success === true) {
-        this.data = data.hotword_list;
+        this.data = data.hotword_list.map((item, index) => {
+          item.index = index;
+          return item;
+        });
         this.totalPage = data.pages
       } else {
         throw new Error(data.message)
@@ -216,6 +221,27 @@ export default class Hot extends Vue {
         }
         message.error(e.message, 1.5)
       }).finally(() => this.confirmLoading = false)
+  }
+
+  move(type, hotWord) {
+    if (this.loading) {
+      return
+    }
+    this.loading = true;
+    hot.moveHot(type, {id: hotWord.id})
+      .finally(() => this.loading = false)
+      .then(data => {
+        if (data.success === true) {
+          this.changePage(this.pn)
+        } else {
+          throw new Error(data.message)
+        }
+      }).catch(e => {
+        if (e.message === '未登录') {
+          return this.doNoLoginAction();
+        }
+        message.error(e.message, 1.5);
+      })
   }
 
   search(value) {

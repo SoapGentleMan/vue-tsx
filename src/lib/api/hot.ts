@@ -26,6 +26,13 @@ class Hot {
       body: options
     })
   }
+
+  moveHot(type, options) {
+    return fetchTimeout(`${SERVER}/admin/hotword_move_${type}`, {
+      method: 'POST',
+      body: options
+    })
+  }
 }
 
 export default new Hot()

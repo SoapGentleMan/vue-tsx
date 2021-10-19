@@ -124,7 +124,7 @@ export default class Word extends Vue {
         id: '',
         text: '',
         search_word: '',
-        rel_level: ''
+        rel_level: '0.10'
       } : {
         id: data.id,
         text: data.text,
@@ -144,7 +144,7 @@ export default class Word extends Vue {
       return false
     }
     value = value + '';
-    if (!value.match(/^(1|0|(0\.[0-9]{2}))$/)) {
+    if (!value.match(/^(1|0|(0\.[0-9]{1,2}))$/)) {
       return false
     }
     return true
