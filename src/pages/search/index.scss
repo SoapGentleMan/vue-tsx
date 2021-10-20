@@ -1,3 +1,5 @@
+@import './screen';
+
 .layout {
   min-height: 100vh !important;
   background-color: #fff;
@@ -116,12 +118,14 @@
   width: 100vw;
   height: 100vh;
   background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
 
   .popup {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translateX(-50%) translateY(-50%);
+    z-index: 1;
   }
 }
 

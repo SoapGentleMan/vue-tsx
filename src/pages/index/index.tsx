@@ -20,6 +20,8 @@ export default class Index extends Vue {
   showLoginModal: boolean = false;
   showResetPswdModal: boolean = false;
 
+  isMobile = window.innerWidth < 500;
+
   created() {
     this.isLogin = !!localStorage.getItem('authorization');
     if (this.isLogin) {
@@ -127,9 +129,9 @@ export default class Index extends Vue {
     return (
       <a-layout class={this.$style.layout}>
         <a-layout-header>
-          {this.isLogin && <a-dropdown>
+          {this.isLogin && <a-dropdown trigger={[this.isMobile ? 'click' : 'hover']}>
             <span class={[this.$style.username, this.userRole === 'ADMIN' ? this.$style.admin : '']}
-                  onClick={() => this.usernameClick()}>{this.username}</span>
+                  onClick={() => !this.isMobile && this.usernameClick()}>{this.username}</span>
             <a-menu slot={'overlay'}>
               <a-menu-item>
                 <a onClick={() => this.showResetPswdModal = true}>修改密码</a>

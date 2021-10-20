@@ -1,0 +1,56 @@
+@media screen and (max-width: 500px) {
+  .layout {
+    :global(.ant-layout-header) {
+      padding: 0 24px;
+    }
+
+    :global(.ant-layout-content) {
+      padding-bottom: 72px;
+    }
+  }
+
+  .logo {
+    display: none;
+  }
+
+  .inputBlock {
+    width: 100%;
+
+    .input {
+      width: 100% !important;
+    }
+  }
+
+  .userBlock {
+    display: none;
+  }
+
+  .content {
+    padding-left: 24px !important;
+    padding-right: 24px;
+  }
+
+  .filterBox {
+    width: 100% !important;
+  }
+
+  .sortBox {
+    width: 100% !important;
+  }
+
+  .noDataBlock {
+    width: 100% !important;
+  }
+
+  .resultList {
+    width: 100% !important;
+  }
+
+  .relWordBlock {
+    width: 100% !important;
+
+    .word {
+      width: 40% !important;
+    }
+  }
+}

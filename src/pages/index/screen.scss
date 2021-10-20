@@ -1,0 +1,27 @@
+@media screen and (max-width: 500px) {
+  .layout {
+    background-size: auto !important;
+  }
+
+  .content {
+    width: 100% !important;
+  }
+
+  .inputBlock {
+    .input {
+      width: 200px !important;
+    }
+  }
+
+  .toggleBlock {
+    width: 80% !important;
+  }
+
+  .hotList {
+    width: 80% !important;
+
+    .hot {
+      width: 40% !important;
+    }
+  }
+}
