@@ -48,23 +48,22 @@ export default class Hot extends Vue {
         title: '状态',
         dataIndex: 'status',
         customRender: text => {
-          return text === 0 ? '未显示' : (text === 1 ? '显示中' : '已过期')
+          return text === 0 ? '待显示' : (text === 1 ? '显示中' : '已过期')
         }
       },
       {
         title: '操作',
         key: 'operate',
         customRender: data => {
-          const notNeedUp = this.pn === 1 && data.index === 0;
-          const notNeedDown = this.pn === this.totalPage && data.index === this.data.length - 1;
+          const needMove = data.status === 0 || data.status === 1;
           return <span>
             <a onClick={() => this.toggleConfirm('edit', data)}>编辑</a>
             <a-divider type={'vertical'}/>
             <a onClick={() => this.toggleConfirm('delete', data)}>删除</a>
-            <a-divider type={'vertical'}/>
-            {!notNeedUp && <a onClick={() => this.move('up', data)}>上移</a>}
-            {(!notNeedUp && !notNeedDown) && <a-divider type={'vertical'}/>}
-            {!notNeedDown && <a onClick={() => this.move('down', data)}>下移</a>}
+            {needMove && <a-divider type={'vertical'}/>}
+            {needMove && <a onClick={() => this.move('up', data)}>上移</a>}
+            {needMove && <a-divider type={'vertical'}/>}
+            {needMove && <a onClick={() => this.move('down', data)}>下移</a>}
           </span>
         }
       },
@@ -80,10 +79,7 @@ export default class Hot extends Vue {
       pn: this.pn, ps: this.ps, search: this.searchValue
     }).then(data => {
       if (data.success === true) {
-        this.data = data.hotword_list.map((item, index) => {
-          item.index = index;
-          return item;
-        });
+        this.data = data.hotword_list;
         this.totalPage = data.pages
       } else {
         throw new Error(data.message)
